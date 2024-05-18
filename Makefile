@@ -20,5 +20,3 @@ patches: scripts/patches_from_worktree.sh
 
 $(ROOT)/%: $(VENDOR_DIR)/%
 	@mkdir -p "$$(dirname $@)" && cp $< $@
-
-test: $(ROOT)/.github/workflows/pull-request.yml
