@@ -10,5 +10,11 @@ if [ ! -d "${VENDOR_DIR:-}" ]; then
 	exit 1
 fi
 
+pushd "$VENDOR_DIR" >/dev/null || exit 1
+trap 'popd >/dev/null' EXIT
+
+git reset --hard
+
 find "$PATCH_DIR" -type f -name '*.patch' \
-	-exec cd "$VENDOR_DIR" \; -a -exec git apply '{}' \;
+	-exec git apply '{}' \; \
+	-print
