@@ -10,7 +10,9 @@ all:
 clean:
 	rm ${ROOT}/.github/workflows/pull-request.yml
 
-.PHONY: patches
+.PHONY: prepare patches
+prepare: scripts/apply_patches.sh
+	@${ROOT}/scripts/apply_patches.sh
 patches: scripts/patches_from_worktree.sh
 	@${ROOT}/scripts/patches_from_worktree.sh
 
