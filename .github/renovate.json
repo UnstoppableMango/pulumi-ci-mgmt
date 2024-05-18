@@ -3,8 +3,7 @@
 	"extends": [
 		"config:base"
 	],
-	"ignorePaths": [
-		"patches/**",
+	"includePaths": [
 		"vendor/**"
 	],
 	"automerge": false,
