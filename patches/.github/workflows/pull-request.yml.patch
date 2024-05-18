@@ -1,0 +1,13 @@
+diff --git a/.github/workflows/pull-request.yml b/.github/workflows/pull-request.yml
+index 3a1cf2941..0058d19b1 100644
+--- a/.github/workflows/pull-request.yml
++++ b/.github/workflows/pull-request.yml
+@@ -2,8 +2,6 @@ on:
+   pull_request:
+     branches:
+       - master
+-env:
+-  GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
+ concurrency:
+   group: ${{ github.workflow }}-${{ github.ref }}
+   cancel-in-progress: true
