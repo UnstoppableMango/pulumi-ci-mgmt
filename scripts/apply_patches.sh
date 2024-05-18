@@ -13,7 +13,10 @@ fi
 pushd "$VENDOR_DIR" >/dev/null || exit 1
 trap 'popd >/dev/null' EXIT
 
-git reset --hard
+if [ -n "$(git status -s)" ]; then
+	echo 'Submodule is not clean'
+	exit 1
+fi
 
 find "$PATCH_DIR" -type f -name '*.patch' \
 	-exec git apply '{}' \; \
