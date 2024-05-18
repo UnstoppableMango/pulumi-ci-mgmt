@@ -12,10 +12,10 @@ all:
 list:
 	@echo '$(MANAGED_FILES)' | tr ' ' '\n'
 
-.PHONY: prepare copy update
+.PHONY: prepare update
 prepare: apply_patches
-copy: prepare $(MANAGED_FILES)
-update: copy reset
+update: prepare reset $(MANAGED_FILES)
+	cd ${VENDOR_DIR} && git reset --hard
 
 .PHONY: reset clean
 reset:
