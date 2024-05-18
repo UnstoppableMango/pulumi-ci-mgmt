@@ -6,12 +6,16 @@ export VENDOR_DIR := $(ROOT)/vendor/github.com/pulumi/ci-mgmt
 PATCHES       := $(shell find $(PATCH_DIR) -type f -name '*.patch')
 MANAGED_FILES := $(patsubst $(PATCH_DIR)/%.patch,$(ROOT)/%,$(PATCHES))
 
+.PHONY: all list
 all:
 	@echo 'Pick a better target silly'
-
-.PHONY: managed
-managed:
+list:
 	@echo '$(MANAGED_FILES)' | tr ' ' '\n'
+
+.PHONY: prepare copy update
+prepare: apply_patches
+copy: prepare $(MANAGED_FILES)
+update: copy reset
 
 .PHONY: reset clean
 reset:
@@ -19,12 +23,11 @@ reset:
 clean: reset
 	find ${PATCH_DIR} -type f -name '*.patch'
 
-.PHONY: prepare patches update
-prepare: reset scripts/apply_patches.sh
+.PHONY: apply_patches patches_from_worktree
+apply_patches: reset scripts/apply_patches.sh
 	@${ROOT}/scripts/apply_patches.sh
-patches: scripts/patches_from_worktree.sh
+patches_from_worktree: scripts/patches_from_worktree.sh
 	@${ROOT}/scripts/patches_from_worktree.sh
-update: $(MANAGED_FILES)
 
 $(ROOT)/%: $(VENDOR_DIR)/%
 	@mkdir -p "$$(dirname $@)" && cp $< $@
