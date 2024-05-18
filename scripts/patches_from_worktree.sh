@@ -17,6 +17,6 @@ fi
 	while IFS= read -r file; do
 		outfile=$"$PATCH_DIR/$file.patch"
 		mkdir -p "$(dirname "$outfile")"
-		git --no-pager diff --submodule=diff -- "$file" > "$outfile"
-	done <<< "$(git --no-pager diff --name-only)"
+		git diff --submodule=diff -- "$file" > "$outfile"
+	done <<< "$(git diff --name-only)"
 )
