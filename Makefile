@@ -6,16 +6,14 @@ export VENDOR_DIR := $(ROOT)/vendor/github.com/pulumi/ci-mgmt
 PATCHES       := $(shell find $(PATCH_DIR) -type f -name '*.patch')
 MANAGED_FILES := $(patsubst $(PATCH_DIR)/%.patch,$(ROOT)/%,$(PATCHES))
 
-.PHONY: all list
-all:
-	@echo 'Pick a better target silly'
+.PHONY: prepare update
+update: prepare $(MANAGED_FILES)
+	cd ${VENDOR_DIR} && git reset --hard
+prepare: apply_patches
+
+.PHONY: list
 list:
 	@echo '$(MANAGED_FILES)' | tr ' ' '\n'
-
-.PHONY: prepare update
-prepare: apply_patches
-update: prepare reset $(MANAGED_FILES)
-	cd ${VENDOR_DIR} && git reset --hard
 
 .PHONY: reset clean
 reset:
