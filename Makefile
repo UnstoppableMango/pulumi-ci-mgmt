@@ -27,7 +27,7 @@ clean: reset
 apply_patches: reset scripts/apply_patches.sh
 	@${ROOT}/scripts/apply_patches.sh
 patches_from_worktree: scripts/patches_from_worktree.sh
-	rm -rf ${PATCH_DIR}
+	rm -rf ${PATCH_DIR}/*
 	@${ROOT}/scripts/patches_from_worktree.sh
 
 $(ROOT)/%: $(VENDOR_DIR)/%
