@@ -22,4 +22,5 @@ while IFS= read -r file; do
 	outfile=$"$PATCH_DIR/$file.patch"
 	mkdir -p "$(dirname "$outfile")"
 	git diff --submodule=diff -- "$file" > "$outfile"
+	echo "Creating $outfile"
 done <<< "$(git diff --name-only)"

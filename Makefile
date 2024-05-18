@@ -27,7 +27,9 @@ clean: reset
 apply_patches: reset scripts/apply_patches.sh
 	@${ROOT}/scripts/apply_patches.sh
 patches_from_worktree: scripts/patches_from_worktree.sh
-	rm -rf ${PATCH_DIR}/*
+	@find ${PATCH_DIR} -type f -name '*.patch' \
+		-exec echo 'Removing {}' \; \
+		-exec rm '{}' +
 	@${ROOT}/scripts/patches_from_worktree.sh
 
 $(ROOT)/%: $(VENDOR_DIR)/%
