@@ -1,0 +1,3 @@
+[submodule "vendor/github.com/pulumi/ci-mgmt"]
+	path = vendor/github.com/pulumi/ci-mgmt
+	url = https://github.com/pulumi/ci-mgmt
