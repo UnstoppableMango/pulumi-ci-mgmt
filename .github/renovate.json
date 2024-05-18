@@ -1,0 +1,14 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:base"
+	],
+	"ignorePaths": [
+		"patches/**",
+		"vendor/**"
+	],
+	"automerge": false,
+	"git-submodules": {
+		"enabled": true
+	}
+}
