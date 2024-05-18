@@ -19,7 +19,8 @@ list:
 reset:
 	cd ${VENDOR_DIR} && git reset --hard
 clean: reset
-	find ${PATCH_DIR} -type f -name '*.patch'
+	@echo 'Removing managed files'
+	@rm -f ${MANAGED_FILES}
 
 .PHONY: apply_patches patches_from_worktree
 apply_patches: reset scripts/apply_patches.sh
