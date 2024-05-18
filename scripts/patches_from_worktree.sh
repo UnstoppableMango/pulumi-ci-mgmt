@@ -10,13 +10,11 @@ if [ ! -d "${VENDOR_DIR:-}" ]; then
 	exit 1
 fi
 
-(
-	pushd "$VENDOR_DIR" >/dev/null || exit
-	trap 'popd >/dev/null' EXIT
+pushd "$VENDOR_DIR" >/dev/null || exit
+trap 'popd >/dev/null' EXIT
 
-	while IFS= read -r file; do
-		outfile=$"$PATCH_DIR/$file.patch"
-		mkdir -p "$(dirname "$outfile")"
-		git diff --submodule=diff -- "$file" > "$outfile"
-	done <<< "$(git diff --name-only)"
-)
+while IFS= read -r file; do
+	outfile=$"$PATCH_DIR/$file.patch"
+	mkdir -p "$(dirname "$outfile")"
+	git diff --submodule=diff -- "$file" > "$outfile"
+done <<< "$(git diff --name-only)"
