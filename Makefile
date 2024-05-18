@@ -9,8 +9,8 @@ all:
 .PHONY: reset clean
 reset:
 	cd ${VENDOR_DIR} && git reset --hard
-clean:
-	rm ${ROOT}/.github/workflows/pull-request.yml
+clean: reset
+	find ${PATCH_DIR} -type f -name '*.patch'
 
 .PHONY: prepare patches
 prepare: reset scripts/apply_patches.sh
@@ -18,5 +18,7 @@ prepare: reset scripts/apply_patches.sh
 patches: scripts/patches_from_worktree.sh
 	@${ROOT}/scripts/patches_from_worktree.sh
 
-.github/workflows/pull-request.yml: $(VENDOR_DIR)/.github/workflows/pull-request.yml
-	cp $(VENDOR_DIR)/.github/workflows/pull-request.yml ${ROOT}/$@
+$(ROOT)/%: $(VENDOR_DIR)/%
+	@mkdir -p "$$(dirname $@)" && cp $< $@
+
+test: $(ROOT)/.github/workflows/pull-request.yml
