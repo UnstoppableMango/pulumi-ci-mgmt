@@ -8,7 +8,8 @@ MANAGED_FILES := $(patsubst $(PATCH_DIR)/%.patch,$(ROOT)/%,$(PATCHES))
 
 .PHONY: prepare update
 update: prepare $(MANAGED_FILES)
-	cd ${VENDOR_DIR} && git reset --hard
+	@echo 'Resetting submodule'
+	@cd ${VENDOR_DIR} && git reset --hard
 prepare: apply_patches
 
 .PHONY: list
@@ -17,7 +18,7 @@ list:
 
 .PHONY: reset clean
 reset:
-	cd ${VENDOR_DIR} && git reset --hard
+	@cd ${VENDOR_DIR} && git reset --hard
 clean: reset
 	@echo 'Removing managed files'
 	@rm -f ${MANAGED_FILES}
