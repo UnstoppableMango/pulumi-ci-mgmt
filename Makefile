@@ -14,9 +14,5 @@ patches: patches_from_worktree
 patches_from_worktree:
 	cd ${VENDOR_DIR} && git --no-pager diff --name-only
 
-.github:
-	@mkdir .github
-.github/workflows: .github
-	@mkdir .github/workflows
-.github/workflows/pull-request.yml: .github/workflows $(VENDOR_DIR)/.github/workflows/pull-request.yml
+.github/workflows/pull-request.yml: $(VENDOR_DIR)/.github/workflows/pull-request.yml
 	cp $(VENDOR_DIR)/.github/workflows/pull-request.yml ${ROOT}/$@
