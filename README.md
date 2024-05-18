@@ -1,2 +1,3 @@
-# pulumi-ci-mgmt
-CI automation for Pulumi providers based on pulumi/ci-mgmt
+# Pulumi CI Management
+
+CI automation for Pulumi providers based on <https://github.com/pulumi/ci-mgmt>.
