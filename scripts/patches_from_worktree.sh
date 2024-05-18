@@ -13,6 +13,11 @@ fi
 pushd "$VENDOR_DIR" >/dev/null || exit
 trap 'popd >/dev/null' EXIT
 
+if [ -z "$(git status -s)" ]; then
+	echo 'No patches to create'
+	exit 0
+fi
+
 while IFS= read -r file; do
 	outfile=$"$PATCH_DIR/$file.patch"
 	mkdir -p "$(dirname "$outfile")"
