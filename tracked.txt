@@ -4,10 +4,10 @@ native-provider-ci/src/github-workflow.d.ts
 native-provider-ci/src/goreleaser.ts
 native-provider-ci/src/provider.ts
 native-provider-ci/src/steps.ts
-native-provider-ci/src/workflow.ts
+native-provider-ci/src/workflows.ts
 native-provider-ci/.eslintrc.js
 native-provider-ci/.node-version
 native-provider-ci/.nvmrc
-native-provider-ci/packge-lock.json
+native-provider-ci/package-lock.json
 native-provider-ci/package.json
 native-provider-ci/tsconfig.json
