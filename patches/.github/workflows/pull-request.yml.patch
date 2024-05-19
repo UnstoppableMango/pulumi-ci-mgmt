@@ -1,5 +1,5 @@
 diff --git a/.github/workflows/pull-request.yml b/.github/workflows/pull-request.yml
-index 3a1cf2941..f26e5d959 100644
+index 3a1cf2941..495ed6aec 100644
 --- a/.github/workflows/pull-request.yml
 +++ b/.github/workflows/pull-request.yml
 @@ -1,9 +1,7 @@
@@ -13,8 +13,21 @@ index 3a1cf2941..f26e5d959 100644
  concurrency:
    group: ${{ github.workflow }}-${{ github.ref }}
    cancel-in-progress: true
-@@ -47,38 +45,13 @@ jobs:
-         run: cd provider-ci && make test-workflow-generation
+@@ -22,8 +20,6 @@ jobs:
+         uses: jaxxstorm/action-install-gh-release@v1.11.0
+         with:
+           repo: rhysd/actionlint
+-      - name: lint providers
+-        run: cd provider-ci && make lint-providers
+       - name: lint native providers
+         run: cd native-provider-ci && make lint
+       - name: lint workflows
+@@ -43,42 +39,15 @@ jobs:
+           repo: pulumi/pulumictl
+       - name: Validate native-providers
+         run: cd native-provider-ci && make all
+-      - name: Validate that our test workflows match checked in workflows
+-        run: cd provider-ci && make test-workflow-generation
        - name: Check worktree clean
          uses: pulumi/git-status-check-action@v1
 -
