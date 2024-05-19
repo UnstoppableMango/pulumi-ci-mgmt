@@ -1,10 +1,7 @@
 native-provider-ci/cmd/generate-providers.ts
 native-provider-ci/src/action-versions.ts
 native-provider-ci/src/github-workflow.d.ts
-native-provider-ci/src/goreleaser.ts
-native-provider-ci/src/provider.ts
 native-provider-ci/src/steps.ts
-native-provider-ci/src/workflows.ts
 native-provider-ci/.eslintrc.js
 native-provider-ci/.node-version
 native-provider-ci/.nvmrc
