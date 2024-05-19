@@ -1,0 +1,49 @@
+diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
+index e66582228..fc5742927 100644
+--- a/native-provider-ci/src/workflows.ts
++++ b/native-provider-ci/src/workflows.ts
+@@ -32,7 +32,6 @@ export const WorkflowOpts = z.object({
+ const env = (opts: WorkflowOpts) =>
+   Object.assign(
+     {
+-      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
+       PROVIDER: opts.provider,
+       PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}",
+       PULUMI_LOCAL_NUGET: "${{ github.workspace }}/nuget",
+@@ -41,14 +40,7 @@ const env = (opts: WorkflowOpts) =>
+       NUGET_PUBLISH_KEY: "${{ secrets.NUGET_PUBLISH_KEY }}",
+       PYPI_USERNAME: "__token__",
+       PYPI_PASSWORD: "${{ secrets.PYPI_API_TOKEN }}",
+-      TRAVIS_OS_NAME: "linux",
+-      SLACK_WEBHOOK_URL: "${{ secrets.SLACK_WEBHOOK_URL }}",
+       PULUMI_GO_DEP_ROOT: "${{ github.workspace }}/..",
+-      PUBLISH_REPO_USERNAME: "${{ secrets.OSSRH_USERNAME }}",
+-      PUBLISH_REPO_PASSWORD: "${{ secrets.OSSRH_PASSWORD }}",
+-      SIGNING_KEY_ID: "${{ secrets.JAVA_SIGNING_KEY_ID }}",
+-      SIGNING_KEY: "${{ secrets.JAVA_SIGNING_KEY }}",
+-      SIGNING_PASSWORD: "${{ secrets.JAVA_SIGNING_PASSWORD }}",
+       GOVERSION: goVersion,
+       NODEVERSION: nodeVersion,
+       PYTHONVERSION: pythonVersion,
+@@ -99,11 +91,7 @@ export function PullRequestWorkflow(
+     env: env(opts),
+     jobs: {
+       "comment-on-pr": new EmptyJob("comment-on-pr")
+-        .addConditional(
+-          "github.event.pull_request.head.repo.full_name != github.repository"
+-        )
+-        .addStep(steps.CheckoutRepoStep())
+-        .addStep(steps.CommentPRWithSlashCommandStep()),
++        .addStep(steps.CheckoutRepoStep()),
+     },
+   };
+ }
+@@ -193,7 +181,7 @@ export function BuildWorkflow(
+     name: name,
+     on: {
+       push: {
+-        branches: ["master", "main", "feature-**"],
++        branches: ["main"],
+         "paths-ignore": ["CHANGELOG.md"],
+         "tags-ignore": ["v*", "sdk/*", "**"],
+       },

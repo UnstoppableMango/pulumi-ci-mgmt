@@ -1,0 +1,22 @@
+diff --git a/native-provider-ci/Makefile b/native-provider-ci/Makefile
+index bcef0c717..f76c6fd4f 100644
+--- a/native-provider-ci/Makefile
++++ b/native-provider-ci/Makefile
+@@ -10,7 +10,7 @@ ensure:
+ clean:
+ 	rm -rf providers/*/repo
+ 
+-test:	
++test:
+ 	npm run lint
+ 
+ format:
+@@ -20,7 +20,7 @@ ifneq ($(NAME),all)
+ provider:
+ 	echo $(NAME)
+ 	npm run gen-providers -- --name $(NAME) --debug
+-else 
++else
+ providers:
+ 	npm run gen-providers
+ endif
