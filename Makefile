@@ -8,11 +8,13 @@ TRACKED       := $(shell cat tracked.txt | sed 's,^,${VENDOR_DIR}/,')
 MANAGED_FILES := $(patsubst $(PATCH_DIR)/%.patch,$(ROOT)/%,$(PATCHES))
 MANAGED_FILES += $(patsubst $(VENDOR_DIR)/%,$(ROOT)/%,$(TRACKED))
 
-.PHONY: prepare update
+.PHONY: prepare update native
 update: prepare $(MANAGED_FILES)
 	@echo 'Resetting submodule'
 	@cd ${VENDOR_DIR} && git reset --hard
 prepare: apply_patches
+native:
+	@$(MAKE) -C native-provider-ci providers
 
 .PHONY: list
 list:
