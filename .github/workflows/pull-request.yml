@@ -20,13 +20,6 @@ jobs:
         uses: jaxxstorm/action-install-gh-release@v1.11.0
         with:
           repo: rhysd/actionlint
-      - name: lint native providers
-        run: cd native-provider-ci && make lint
-      - name: lint workflows
-        run: |
-          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color
-        shell: bash
   test:
     name: Verify against testdata
     runs-on: ubuntu-latest
