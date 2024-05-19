@@ -17,7 +17,7 @@
     "ts-node": "^10.7.0",
     "typescript": "^4.6.0"
   },
-  "homepage": "https://github.com/pulumi/ci-mgmt#readme",
+  "homepage": "https://github.com/UnstoppableMango/pulumi-ci-mgmt#readme",
   "keywords": [
     "configuration",
     "code",
@@ -26,10 +26,10 @@
   ],
   "license": "Apache-2.0",
   "module": "workflow.ts",
-  "name": "@pulumi/ci-mgmt",
+  "name": "@unmango/pulumi-ci-mgmt",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pulumi/ci-mgmt.git"
+    "url": "git+https://github.com/UnstoppableMango/pulumi-ci-mgmt.git"
   },
   "scripts": {
     "discovery": "wget https://json.schemastore.org/github-workflow.json -O github-workflow.json && json2ts -i github-workflow.json -o src/github-workflow.d.ts --unreachableDefinitions --ignoreMinAndMaxItems",
