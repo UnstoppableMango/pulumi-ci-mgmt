@@ -9,5 +9,4 @@ native-provider-ci/.eslintrc.js
 native-provider-ci/.node-version
 native-provider-ci/.nvmrc
 native-provider-ci/package-lock.json
-native-provider-ci/package.json
 native-provider-ci/tsconfig.json
