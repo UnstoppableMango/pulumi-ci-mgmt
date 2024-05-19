@@ -131,8 +131,6 @@ export class PulumiGoreleaserPreConfig implements GoreleaserConfig {
 
     this.project_name = `pulumi-${opts.provider}`;
 
-    if (!opts.skipCodegen) {
-    }
     this.builds = [
       {
         dir: "provider",

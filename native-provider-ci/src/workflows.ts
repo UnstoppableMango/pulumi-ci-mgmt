@@ -90,8 +90,9 @@ export function PullRequestWorkflow(
     },
     env: env(opts),
     jobs: {
-      "comment-on-pr": new EmptyJob("comment-on-pr")
-        .addStep(steps.CheckoutRepoStep()),
+      "comment-on-pr": new EmptyJob("comment-on-pr").addStep(
+        steps.CheckoutRepoStep()
+      ),
     },
   };
 }
