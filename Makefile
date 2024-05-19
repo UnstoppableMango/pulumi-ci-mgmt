@@ -5,6 +5,7 @@ export VENDOR_DIR := $(ROOT)/vendor/github.com/pulumi/ci-mgmt
 
 PATCHES       := $(shell find $(PATCH_DIR) -type f -name '*.patch')
 MANAGED_FILES := $(patsubst $(PATCH_DIR)/%.patch,$(ROOT)/%,$(PATCHES))
+MANAGED_FILES += $(shell ls -d -- $$(cat managed.txt | sed 's,^,${VENDOR_DIR}/,'))
 
 .PHONY: prepare update
 update: prepare $(MANAGED_FILES)
