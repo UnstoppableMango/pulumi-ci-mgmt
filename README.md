@@ -8,7 +8,7 @@ The pulumi/ci-mgmt repo is included as a submodule under `vendor/github.com/pulu
 The pulumi/ci-mgmt README with actual details about what's going on can be accessed [here](/vendor/github.com/pulumi/ci-mgmt/README.md).
 
 Modifications can be made by editing files inside the submodule to "manage" them.
-I've defined a "managed" file to mean any patched or explicitly copied file from the submodule.
+I've defined a "managed" file to mean any patched file from the submodule or matched by patterns in `managed.txt`.
 Managed files are then copied to this repository.
 
 The general workflow is:

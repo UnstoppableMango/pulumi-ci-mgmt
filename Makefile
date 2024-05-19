@@ -21,8 +21,7 @@ list:
 .PHONY: reset clean
 reset:
 	@cd ${VENDOR_DIR} && git reset --hard
-clean: reset
-	@echo 'Removing managed files'
+clean: reset list
 	@rm -f ${MANAGED_FILES}
 
 .PHONY: apply_patches patches_from_worktree
