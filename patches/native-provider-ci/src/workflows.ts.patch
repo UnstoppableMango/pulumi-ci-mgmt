@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index 300f8bf03..74340ea6b 100644
+index 300f8bf03..d3fd33cbf 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
 @@ -32,7 +32,6 @@ export const WorkflowOpts = z.object({
@@ -25,20 +25,23 @@ index 300f8bf03..74340ea6b 100644
        GOVERSION: goVersion,
        NODEVERSION: nodeVersion,
        PYTHONVERSION: pythonVersion,
-@@ -99,11 +91,7 @@ export function PullRequestWorkflow(
+@@ -98,12 +90,9 @@ export function PullRequestWorkflow(
+     },
      env: env(opts),
      jobs: {
-       "comment-on-pr": new EmptyJob("comment-on-pr")
+-      "comment-on-pr": new EmptyJob("comment-on-pr")
 -        .addConditional(
 -          "github.event.pull_request.head.repo.full_name != github.repository"
 -        )
 -        .addStep(steps.CheckoutRepoStep())
 -        .addStep(steps.CommentPRWithSlashCommandStep()),
-+        .addStep(steps.CheckoutRepoStep()),
++      "comment-on-pr": new EmptyJob("comment-on-pr").addStep(
++        steps.CheckoutRepoStep()
++      ),
      },
    };
  }
-@@ -193,7 +181,7 @@ export function BuildWorkflow(
+@@ -193,7 +182,7 @@ export function BuildWorkflow(
      name: name,
      on: {
        push: {
