@@ -97,14 +97,6 @@ jobs:
           ${{ env.SCHEMA_CHANGES }}
         comment_tag: schemaCheck
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - if: contains(env.SCHEMA_CHANGES, 'Looking good! No breaking changes found.') &&
-        github.actor == 'pulumi-bot'
-      name: Add label if no breaking changes
-      uses: actions-ecosystem/action-add-labels@v1.1.0
-      with:
-        labels: impact/no-changelog-required
-        number: ${{ github.event.issue.number }}
-        github_token: ${{ secrets.GITHUB_TOKEN }}
     - name: Build Provider
       run: make provider
     - name: Check worktree clean
@@ -127,22 +119,11 @@ jobs:
         path: ${{ github.workspace }}/bin/provider.tar.gz
     - name: Test Provider Library
       run: make test_provider
-    - name: Upload coverage reports to Codecov
-      uses: codecov/codecov-action@v4
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        author_name: Failure in building provider prerequisites
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
     if: github.event_name == 'repository_dispatch' ||
       github.event.pull_request.head.repo.full_name == github.repository
   build_sdks:
     needs: prerequisites
-    runs-on: pulumi-ubuntu-8core
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
@@ -231,17 +212,10 @@ jobs:
         name: ${{ matrix.language  }}-sdk.tar.gz
         path: ${{ github.workspace}}/sdk/${{ matrix.language }}.tar.gz
         retention-days: 30
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        author_name: Failure while building SDKs
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
     if: github.event_name == 'repository_dispatch' ||
       github.event.pull_request.head.repo.full_name == github.repository
   test:
-    runs-on: pulumi-ubuntu-8core
+    runs-on: ubuntu-latest
     needs:
     - build_sdks
     strategy:
@@ -342,13 +316,6 @@ jobs:
         set -euo pipefail
 
         cd examples && go test -v -json -count=1 -cover -timeout 2h -tags=${{ matrix.language }} -parallel 4 . 2>&1 | tee /tmp/gotest.log | gotestfmt
-    - if: failure() && github.event_name == 'push'
-      name: Notify Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        author_name: Failure in SDK tests
-        fields: repo,commit,author,action
-        status: ${{ job.status }}
     if: github.event_name == 'repository_dispatch' ||
       github.event.pull_request.head.repo.full_name == github.repository
   sentinel:
