@@ -32,7 +32,6 @@ export const cleanupArtifact = "c-hive/gha-remove-artifacts@v1";
 export const createOrUpdateComment = "peter-evans/create-or-update-comment@v1";
 export const deleteArtifact = "geekyeggo/delete-artifact@v1";
 export const downloadArtifact = "actions/download-artifact@v4";
-export const notifySlack = "8398a7/action-slack@v3";
 export const pathsFilter = "dorny/paths-filter@v2";
 export const pullRequest = "repo-sync/pull-request@v2.6.2";
 export const prComment = "thollander/actions-comment-pull-request@v2";
@@ -41,7 +40,6 @@ export const uploadArtifact = "actions/upload-artifact@v4";
 export const githubScript = "actions/github-script@v6";
 export const upgradeProviderAction =
   "pulumi/pulumi-upgrade-provider-action@v0.0.5";
-export const slackNotification = "rtCamp/action-slack-notify@v2";
 export const freeDiskSpace = "jlumbroso/free-disk-space@v1.3.1"; // action does not support major version pinning, so we need to pin to exact version
 export const createKindCluster = "helm/kind-action@v1";
 export const githubStatusAction =

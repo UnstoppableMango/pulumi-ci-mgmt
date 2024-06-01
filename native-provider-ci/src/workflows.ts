@@ -364,63 +364,12 @@ export function Cf2PulumiReleaseWorkflow(
   };
 }
 
-// creates arm2pulumi-coverage-report.yml
-export function Arm2PulumiCoverageReportWorkflow(
-  name: string,
-  opts: WorkflowOpts
-): GithubWorkflow {
-  return {
-    name: name,
-    on: {
-      schedule: [
-        {
-          cron: "35 17 * * *",
-        },
-      ],
-      workflow_dispatch: {},
-    },
-    env: env(opts),
-    jobs: {
-      "generate-coverage": new Arm2PulumiCoverageReport("coverage-report"),
-    },
-  };
-}
-
-// creates arm2pulumi-release.yml
-export function Arm2PulumiReleaseWorkflow(
-  name: string,
-  opts: WorkflowOpts
-): GithubWorkflow {
-  return {
-    name: name,
-    on: {
-      push: {
-        tags: ["v*.*.*", "!v*.*.*-**"],
-      },
-      workflow_dispatch: {
-        inputs: {
-          version: {
-            description:
-              "The version of the binary to deploy - do not include the pulumi prefix in the name.",
-            required: true,
-            type: "string",
-          },
-        },
-      },
-    },
-    env: env(opts),
-    jobs: {
-      release: new Arm2PulumiRelease("release"),
-    },
-  };
-}
-
 // This section represents sub-jobs that may be used in more than one workflow
 
 export class BuildSdkJob implements NormalJob {
   needs = "prerequisites";
 
-  "runs-on" = "pulumi-ubuntu-8core"; // insufficient resources to run Go builds on ubuntu-latest
+  "runs-on" = "ubuntu-latest"; // not sure how I plan to resolve the issue with go builds
 
   strategy = {
     "fail-fast": true,
@@ -462,7 +411,6 @@ export class BuildSdkJob implements NormalJob {
       steps.Porcelain(),
       steps.ZipSDKsStep(),
       steps.UploadSDKs(tag),
-      steps.NotifySlack("Failure while building SDKs"),
     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
     Object.assign(this, { name });
   }
@@ -510,15 +458,12 @@ export class PrerequisitesJob implements NormalJob {
       steps.MakeKubernetesProvider(opts.provider),
       steps.CheckSchemaChanges(opts.provider),
       steps.CommentSchemaChangesOnPR(opts.provider),
-      steps.LabelIfNoBreakingChanges(opts.provider),
       steps.BuildProvider(opts.provider),
       steps.CheckCleanWorkTree(),
       steps.Porcelain(),
       steps.TarProviderBinaries(opts.hasGenBinary),
       steps.UploadProviderBinaries(),
       steps.TestProviderLibrary(),
-      steps.Codecov(),
-      steps.NotifySlack("Failure in building provider prerequisites"),
     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
     Object.assign(this, { name });
   }
@@ -536,7 +481,7 @@ export class PrerequisitesJob implements NormalJob {
 }
 
 export class TestsJob implements NormalJob {
-  "runs-on" = "pulumi-ubuntu-8core"; // insufficient resources to run Go builds on ubuntu-latest, specifically for K8S
+  "runs-on" = "ubuntu-latest"; // not sure how I plan to resolve the issue with go builds, if its only k8s we're good
 
   needs = ["build_sdks"];
   strategy = {
@@ -603,7 +548,6 @@ export class TestsJob implements NormalJob {
       steps.SetupGotestfmt(),
       steps.CreateKindCluster(opts.provider, workflowName),
       steps.RunTests(opts.provider, workflowName),
-      steps.NotifySlack("Failure in SDK tests"),
     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
     Object.assign(this, { name: jobName });
   }
@@ -752,7 +696,6 @@ export class PublishPrereleaseJob implements NormalJob {
       steps.RunGoReleaserWithArgs(
         `-p ${opts.parallel} -f .goreleaser.prerelease.yml --clean --skip=validate --timeout ${opts.timeout}m0s`
       ),
-      steps.NotifySlack("Failure in publishing binaries"),
     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
     Object.assign(this, { name });
   }
@@ -781,7 +724,6 @@ export class PublishJob implements NormalJob {
       steps.RunGoReleaserWithArgs(
         `-p ${opts.parallel} release --clean --timeout ${opts.timeout}m0s`
       ),
-      steps.NotifySlack("Failure in publishing binaries"),
     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
   }
 }
@@ -813,7 +755,6 @@ export class PublishSDKJob implements NormalJob {
       steps.UnzipSpecificSDKStep("nodejs"),
       steps.InstallTwine(),
       steps.RunPublishSDK(),
-      steps.NotifySlack("Failure in publishing SDK"),
     ];
   }
 }
@@ -907,32 +848,6 @@ export class Arm2PulumiRelease implements NormalJob {
   }
 }
 
-export class Arm2PulumiCoverageReport implements NormalJob {
-  "runs-on" = "ubuntu-latest";
-  steps = [
-    steps.CheckoutRepoStep(),
-    steps.InstallGo(goVersion),
-    steps.InstallPulumiCtl(),
-    steps.InstallPulumiCli(),
-    steps.AzureLogin("azure-native"),
-    steps.MakeClean(),
-    steps.InitializeSubModules(true),
-    steps.BuildCodegenBinaries("azure-native"),
-    steps.MakeLocalGenerate(),
-    steps.BuildProvider("azure-native"),
-    steps.GenerateCoverageReport(),
-    steps.TestResultsJSON(),
-    steps.AwsCredentialsForArmCoverageReport(),
-    steps.UploadArmCoverageToS3(),
-  ];
-  name: string;
-
-  constructor(name: string) {
-    this.name = name;
-    Object.assign(this, { name });
-  }
-}
-
 export class WeeklyPulumiUpdate implements NormalJob {
   "runs-on" = "ubuntu-latest";
   steps: NormalJob["steps"];
@@ -985,7 +900,6 @@ export class NightlySdkGeneration implements NormalJob {
       steps.CommitAutomatedSDKUpdates(opts.provider),
       steps.PullRequestSdkGeneration(opts.provider, opts.defaultBranch),
       // steps.SetPRAutoMerge(opts.provider),
-      steps.NotifySlack("Failure during automated SDK generation"),
     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
     Object.assign(this, { name });
   }

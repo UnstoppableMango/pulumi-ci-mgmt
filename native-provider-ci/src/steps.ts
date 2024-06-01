@@ -548,22 +548,6 @@ export function CheckSchemaChanges(provider: string): Step {
   };
 }
 
-export function LabelIfNoBreakingChanges(provider: string): Step {
-  if (provider === "command") {
-    return {};
-  }
-  return {
-    if: "contains(env.SCHEMA_CHANGES, 'Looking good! No breaking changes found.') && github.actor == 'pulumi-bot'",
-    name: "Add label if no breaking changes",
-    uses: action.addLabel,
-    with: {
-      labels: "impact/no-changelog-required",
-      number: "${{ github.event.issue.number }}",
-      github_token: "${{ secrets.GITHUB_TOKEN }}",
-    },
-  };
-}
-
 export function CommentSchemaChangesOnPR(provider: string): Step {
   if (provider === "command") {
     return {};
@@ -1003,19 +987,6 @@ go/**
   };
 }
 
-export function NotifySlack(name: string): Step {
-  return {
-    if: "failure() && github.event_name == 'push'",
-    name: "Notify Slack",
-    uses: action.notifySlack,
-    with: {
-      author_name: `${name}`,
-      fields: "repo,commit,author,action",
-      status: "${{ job.status }}",
-    },
-  };
-}
-
 export function DownloadSpecificSDKStep(name: string): Step {
   return {
     name: `Download ${name} SDK`,
@@ -1097,21 +1068,6 @@ export function AzureLogin(provider: string): Step {
   return {};
 }
 
-export function AwsCredentialsForArmCoverageReport(): Step {
-  return {
-    name: "Configure AWS Credentials",
-    uses: action.configureAwsCredentials,
-    with: {
-      "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
-      "aws-region": "us-west-2",
-      "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-      "role-duration-seconds": 3600,
-      "role-session-name": "arm2pulumiCvg@githubActions",
-      "role-to-assume": "${{ secrets.AWS_CI_ROLE_ARN }}",
-    },
-  };
-}
-
 export function MakeClean(): Step {
   return {
     name: "Cleanup SDK Folder",
@@ -1126,13 +1082,6 @@ export function MakeLocalGenerate(): Step {
   };
 }
 
-export function GenerateCoverageReport(): Step {
-  return {
-    name: "Generate coverage report",
-    run: "make arm2pulumi_coverage_report",
-  };
-}
-
 export function TestResultsJSON(): Step {
   return {
     name: "Test usage of results.json",
@@ -1140,20 +1089,10 @@ export function TestResultsJSON(): Step {
   };
 }
 
-export function UploadArmCoverageToS3(): Step {
-  return {
-    name: "Upload results to S3",
-    run: "cd provider/pkg/arm2pulumi/internal/test && bash s3-upload-script.sh",
-  };
-}
-
 export function PrepareGitBranchForSdkGeneration(): Step {
   return {
     name: "Preparing Git Branch",
-    run:
-      'git config --local user.email "bot@pulumi.com"\n' +
-      'git config --local user.name "pulumi-bot"\n' +
-      "git checkout -b generate-sdk/${{ github.run_id }}-${{ github.run_number }}\n",
+    run: "git checkout -b generate-sdk/${{ github.run_id }}-${{ github.run_number }}\n",
   };
 }
 
@@ -1182,16 +1121,6 @@ export function MakeDiscovery(provider: string): Step {
     };
   }
   return {};
-}
-
-export function Codecov(): Step {
-  return {
-    name: "Upload coverage reports to Codecov",
-    uses: action.codecov,
-    env: {
-      CODECOV_TOKEN: "${{ secrets.CODECOV_TOKEN }}",
-    },
-  };
 }
 
 export function FreeDiskSpace(runner: string): Step {
