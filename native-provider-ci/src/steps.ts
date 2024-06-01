@@ -115,6 +115,20 @@ export function EchoSuccessStep(): Step {
   };
 }
 
+export function SentinelStep(): Step {
+  return {
+    name: "Mark workflow as successful",
+    uses: action.githubStatusAction,
+    with: {
+      authToken: "${{ secrets.GITHUB_TOKEN }}",
+      context: "Sentinel",
+      state: "success",
+      description: "Sentinel checks passed",
+      sha: "${{ github.event.pull_request.head.sha || github.sha }}",
+    },
+  };
+}
+
 export function UpdatePRWithResultsStep(): Step {
   return {
     name: "Update with Result",
@@ -475,7 +489,7 @@ export function CheckCleanWorkTree(): Step {
       "allowed-changes": `\
 sdk/**/pulumi-plugin.json
 sdk/dotnet/Pulumi.*.csproj
-sdk/go/*/internal/pulumiUtilities.go
+sdk/go/**/pulumiUtilities.go
 sdk/nodejs/package.json
 sdk/python/pyproject.toml`,
     },
@@ -919,6 +933,8 @@ export function UpdatePulumi(): Step {
       "git config --local user.name 'pulumi-bot'\n" +
       "git checkout -b update-pulumi/${{ github.run_id }}-${{ github.run_number }}\n" +
       "for MODFILE in $(find . -name go.mod); do pushd $(dirname $MODFILE); go get github.com/pulumi/pulumi/pkg/v3 github.com/pulumi/pulumi/sdk/v3; go mod tidy; popd; done\n" +
+      // Fetch latest release version of Pulumi, remove the leading 'v' and store it to the `.pulumi.version` file.
+      "gh repo view pulumi/pulumi --json latestRelease --jq .latestRelease.tagName | sed 's/^v//' > .pulumi.version\n" +
       "git update-index -q --refresh\n" +
       'if ! git diff-files --quiet; then echo changes=1 >> "$GITHUB_OUTPUT"; fi',
   };
