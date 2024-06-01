@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index 300f8bf03..0ed4996ed 100644
+index 300f8bf03..0645e88e2 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
 @@ -4,7 +4,7 @@ import * as steps from "./steps";
@@ -157,7 +157,15 @@ index 300f8bf03..0ed4996ed 100644
  
    needs = ["build_sdks"];
    strategy = {
-@@ -614,7 +548,6 @@ export class TestsJob implements NormalJob {
+@@ -606,7 +540,6 @@ export class TestsJob implements NormalJob {
+       steps.InstallSDKDeps(),
+       steps.MakeKubeDir(opts.provider, workflowName),
+       steps.DownloadKubeconfig(opts.provider, workflowName),
+-      steps.ConfigureAwsCredentialsForTests(opts.aws),
+       steps.GoogleAuth(opts.gcp),
+       steps.SetupGCloud(opts.gcp),
+       steps.InstallKubectl(opts.provider),
+@@ -614,7 +547,6 @@ export class TestsJob implements NormalJob {
        steps.SetupGotestfmt(),
        steps.CreateKindCluster(opts.provider, workflowName),
        steps.RunTests(opts.provider, workflowName),
@@ -165,7 +173,11 @@ index 300f8bf03..0ed4996ed 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name: jobName });
    }
-@@ -763,7 +696,6 @@ export class PublishPrereleaseJob implements NormalJob {
+@@ -759,11 +691,9 @@ export class PublishPrereleaseJob implements NormalJob {
+       steps.FreeDiskSpace(this["runs-on"]),
+       steps.InstallPulumiCtl(),
+       steps.InstallPulumiCli(opts.pulumiCLIVersion),
+-      steps.ConfigureAwsCredentialsForPublish(),
        steps.RunGoReleaserWithArgs(
          `-p ${opts.parallel} -f .goreleaser.prerelease.yml --clean --skip=validate --timeout ${opts.timeout}m0s`
        ),
@@ -173,7 +185,11 @@ index 300f8bf03..0ed4996ed 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -792,7 +724,6 @@ export class PublishJob implements NormalJob {
+@@ -788,11 +718,9 @@ export class PublishJob implements NormalJob {
+       steps.FreeDiskSpace(this["runs-on"]),
+       steps.InstallPulumiCtl(),
+       steps.InstallPulumiCli(opts.pulumiCLIVersion),
+-      steps.ConfigureAwsCredentialsForPublish(),
        steps.RunGoReleaserWithArgs(
          `-p ${opts.parallel} release --clean --timeout ${opts.timeout}m0s`
        ),
@@ -181,7 +197,7 @@ index 300f8bf03..0ed4996ed 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
    }
  }
-@@ -824,7 +755,6 @@ export class PublishSDKJob implements NormalJob {
+@@ -824,7 +752,6 @@ export class PublishSDKJob implements NormalJob {
        steps.UnzipSpecificSDKStep("nodejs"),
        steps.InstallTwine(),
        steps.RunPublishSDK(),
@@ -189,7 +205,7 @@ index 300f8bf03..0ed4996ed 100644
      ];
    }
  }
-@@ -918,32 +848,6 @@ export class Arm2PulumiRelease implements NormalJob {
+@@ -918,32 +845,6 @@ export class Arm2PulumiRelease implements NormalJob {
    }
  }
  
@@ -222,7 +238,15 @@ index 300f8bf03..0ed4996ed 100644
  export class WeeklyPulumiUpdate implements NormalJob {
    "runs-on" = "ubuntu-latest";
    steps: NormalJob["steps"];
-@@ -996,7 +900,6 @@ export class NightlySdkGeneration implements NormalJob {
+@@ -983,7 +884,6 @@ export class NightlySdkGeneration implements NormalJob {
+       steps.InstallGo(goVersion),
+       steps.InstallPulumiCtl(),
+       steps.InstallPulumiCli(opts.pulumiCLIVersion),
+-      steps.ConfigureAwsCredentialsForTests(opts.aws),
+       steps.AzureLogin(opts.provider),
+       steps.MakeClean(),
+       steps.PrepareGitBranchForSdkGeneration(),
+@@ -996,7 +896,6 @@ export class NightlySdkGeneration implements NormalJob {
        steps.CommitAutomatedSDKUpdates(opts.provider),
        steps.PullRequestSdkGeneration(opts.provider, opts.defaultBranch),
        // steps.SetPRAutoMerge(opts.provider),

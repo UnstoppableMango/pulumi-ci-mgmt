@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/steps.ts b/native-provider-ci/src/steps.ts
-index b7114a324..33f22c4e6 100644
+index b7114a324..41e1a3459 100644
 --- a/native-provider-ci/src/steps.ts
 +++ b/native-provider-ci/src/steps.ts
 @@ -28,7 +28,6 @@ export function CommandDispatchStep(providerName: string): Step {
@@ -38,7 +38,48 @@ index b7114a324..33f22c4e6 100644
        repository:
          "${{ github.event.client_payload.github.payload.repository.full_name }}",
        "issue-number":
-@@ -346,9 +331,6 @@ export function DispatchDocsBuildEvent(): Step {
+@@ -199,40 +184,6 @@ export function SetupGCloud(requiresGcp?: boolean): Step {
+   return {};
+ }
+ 
+-export function ConfigureAwsCredentialsForTests(requiresAws?: boolean): Step {
+-  if (requiresAws) {
+-    return {
+-      name: "Configure AWS Credentials",
+-      uses: action.configureAwsCredentials,
+-      with: {
+-        "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
+-        "aws-region": "${{ env.AWS_REGION }}",
+-        "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
+-        "role-duration-seconds": 3600,
+-        "role-session-name": "${{ env.PROVIDER }}@githubActions",
+-        "role-to-assume": "${{ secrets.AWS_CI_ROLE_ARN }}",
+-      },
+-    };
+-  }
+-  return {};
+-}
+-
+-export function ConfigureAwsCredentialsForPublish(): Step {
+-  return {
+-    name: "Configure AWS Credentials",
+-    uses: action.configureAwsCredentials,
+-    with: {
+-      "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
+-      "aws-region": "us-east-2",
+-      "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
+-      "role-duration-seconds": 7200,
+-      "role-session-name": "${{ env.PROVIDER }}@githubActions",
+-      "role-external-id": "upload-pulumi-release",
+-      "role-to-assume": "${{ secrets.AWS_UPLOAD_ROLE_ARN }}",
+-    },
+-  };
+-}
+-
+ export function InstallGo(version?: string): Step {
+   return {
+     name: "Install Go",
+@@ -346,9 +297,6 @@ export function DispatchDocsBuildEvent(): Step {
    return {
      name: "Dispatch Event",
      run: "pulumictl create docs-build pulumi-${{ env.PROVIDER }} ${GITHUB_REF#refs/tags/}",
@@ -48,7 +89,7 @@ index b7114a324..33f22c4e6 100644
    };
  }
  
-@@ -533,19 +515,12 @@ export function PullRequestSdkGeneration(
+@@ -533,19 +481,12 @@ export function PullRequestSdkGeneration(
    branch: string
  ): Step {
    let dir;
@@ -68,7 +109,7 @@ index b7114a324..33f22c4e6 100644
        pr_body: "*Automated PR*",
        pr_title: `Automated SDK generation @ ${dir} \${{ steps.vars.outputs.commit-hash }}`,
        author_name: "pulumi-bot",
-@@ -570,25 +545,6 @@ export function CheckSchemaChanges(provider: string): Step {
+@@ -570,25 +511,6 @@ export function CheckSchemaChanges(provider: string): Step {
        "echo 'SCHEMA_CHANGES<<EOF' >> $GITHUB_ENV\n" +
        "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
        "echo 'EOF' >> $GITHUB_ENV",
@@ -94,7 +135,7 @@ index b7114a324..33f22c4e6 100644
    };
  }
  
-@@ -977,10 +933,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
+@@ -977,10 +899,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
          "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
        destination_branch: branch,
        pr_title: "Automated Pulumi/Pulumi upgrade",
@@ -105,7 +146,7 @@ index b7114a324..33f22c4e6 100644
      },
    };
  }
-@@ -995,7 +947,6 @@ export function SetPRAutoMerge(provider?: string): Step {
+@@ -995,7 +913,6 @@ export function SetPRAutoMerge(provider?: string): Step {
      if: "steps.create-pr.outputs.has_changed_files",
      uses: action.autoMerge,
      with: {
@@ -113,7 +154,7 @@ index b7114a324..33f22c4e6 100644
        "pull-request-number": "${{ steps.create-pr.outputs.pr_number }}",
        repository: "${{ github.repository }}",
        "merge-method": "squash",
-@@ -1036,19 +987,6 @@ go/**
+@@ -1036,19 +953,6 @@ go/**
    };
  }
  
@@ -133,7 +174,16 @@ index b7114a324..33f22c4e6 100644
  export function DownloadSpecificSDKStep(name: string): Step {
    return {
      name: `Download ${name} SDK`,
-@@ -1130,21 +1068,6 @@ export function AzureLogin(provider: string): Step {
+@@ -1077,7 +981,7 @@ export function InstallTwine(): Step {
+ export function RunPublishSDK(): Step {
+   return {
+     name: "Publish SDKs",
+-    run: "./ci-scripts/ci/publish-tfgen-package ${{ github.workspace }}",
++    run: "./scripts/publish_sdks.sh ${{ github.workspace }}",
+     env: {
+       NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}",
+       // See https://github.com/pulumi/scripts/pull/138/files
+@@ -1130,21 +1034,6 @@ export function AzureLogin(provider: string): Step {
    return {};
  }
  
@@ -155,7 +205,7 @@ index b7114a324..33f22c4e6 100644
  export function MakeClean(): Step {
    return {
      name: "Cleanup SDK Folder",
-@@ -1159,13 +1082,6 @@ export function MakeLocalGenerate(): Step {
+@@ -1159,13 +1048,6 @@ export function MakeLocalGenerate(): Step {
    };
  }
  
@@ -169,7 +219,7 @@ index b7114a324..33f22c4e6 100644
  export function TestResultsJSON(): Step {
    return {
      name: "Test usage of results.json",
-@@ -1173,20 +1089,10 @@ export function TestResultsJSON(): Step {
+@@ -1173,20 +1055,10 @@ export function TestResultsJSON(): Step {
    };
  }
  
@@ -191,7 +241,7 @@ index b7114a324..33f22c4e6 100644
    };
  }
  
-@@ -1217,16 +1123,6 @@ export function MakeDiscovery(provider: string): Step {
+@@ -1217,16 +1089,6 @@ export function MakeDiscovery(provider: string): Step {
    return {};
  }
  
