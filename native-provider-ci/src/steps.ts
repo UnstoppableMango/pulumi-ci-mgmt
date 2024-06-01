@@ -184,40 +184,6 @@ export function SetupGCloud(requiresGcp?: boolean): Step {
   return {};
 }
 
-export function ConfigureAwsCredentialsForTests(requiresAws?: boolean): Step {
-  if (requiresAws) {
-    return {
-      name: "Configure AWS Credentials",
-      uses: action.configureAwsCredentials,
-      with: {
-        "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
-        "aws-region": "${{ env.AWS_REGION }}",
-        "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-        "role-duration-seconds": 3600,
-        "role-session-name": "${{ env.PROVIDER }}@githubActions",
-        "role-to-assume": "${{ secrets.AWS_CI_ROLE_ARN }}",
-      },
-    };
-  }
-  return {};
-}
-
-export function ConfigureAwsCredentialsForPublish(): Step {
-  return {
-    name: "Configure AWS Credentials",
-    uses: action.configureAwsCredentials,
-    with: {
-      "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
-      "aws-region": "us-east-2",
-      "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-      "role-duration-seconds": 7200,
-      "role-session-name": "${{ env.PROVIDER }}@githubActions",
-      "role-external-id": "upload-pulumi-release",
-      "role-to-assume": "${{ secrets.AWS_UPLOAD_ROLE_ARN }}",
-    },
-  };
-}
-
 export function InstallGo(version?: string): Step {
   return {
     name: "Install Go",
@@ -1015,7 +981,7 @@ export function InstallTwine(): Step {
 export function RunPublishSDK(): Step {
   return {
     name: "Publish SDKs",
-    run: "./ci-scripts/ci/publish-tfgen-package ${{ github.workspace }}",
+    run: "./scripts/publish_sdks.sh ${{ github.workspace }}",
     env: {
       NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}",
       // See https://github.com/pulumi/scripts/pull/138/files

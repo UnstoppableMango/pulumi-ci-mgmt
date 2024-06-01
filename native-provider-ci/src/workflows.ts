@@ -540,7 +540,6 @@ export class TestsJob implements NormalJob {
       steps.InstallSDKDeps(),
       steps.MakeKubeDir(opts.provider, workflowName),
       steps.DownloadKubeconfig(opts.provider, workflowName),
-      steps.ConfigureAwsCredentialsForTests(opts.aws),
       steps.GoogleAuth(opts.gcp),
       steps.SetupGCloud(opts.gcp),
       steps.InstallKubectl(opts.provider),
@@ -692,7 +691,6 @@ export class PublishPrereleaseJob implements NormalJob {
       steps.FreeDiskSpace(this["runs-on"]),
       steps.InstallPulumiCtl(),
       steps.InstallPulumiCli(opts.pulumiCLIVersion),
-      steps.ConfigureAwsCredentialsForPublish(),
       steps.RunGoReleaserWithArgs(
         `-p ${opts.parallel} -f .goreleaser.prerelease.yml --clean --skip=validate --timeout ${opts.timeout}m0s`
       ),
@@ -720,7 +718,6 @@ export class PublishJob implements NormalJob {
       steps.FreeDiskSpace(this["runs-on"]),
       steps.InstallPulumiCtl(),
       steps.InstallPulumiCli(opts.pulumiCLIVersion),
-      steps.ConfigureAwsCredentialsForPublish(),
       steps.RunGoReleaserWithArgs(
         `-p ${opts.parallel} release --clean --timeout ${opts.timeout}m0s`
       ),
@@ -887,7 +884,6 @@ export class NightlySdkGeneration implements NormalJob {
       steps.InstallGo(goVersion),
       steps.InstallPulumiCtl(),
       steps.InstallPulumiCli(opts.pulumiCLIVersion),
-      steps.ConfigureAwsCredentialsForTests(opts.aws),
       steps.AzureLogin(opts.provider),
       steps.MakeClean(),
       steps.PrepareGitBranchForSdkGeneration(),
