@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/steps.ts b/native-provider-ci/src/steps.ts
-index b7114a324..3f02804de 100644
+index b7114a324..33f22c4e6 100644
 --- a/native-provider-ci/src/steps.ts
 +++ b/native-provider-ci/src/steps.ts
 @@ -28,7 +28,6 @@ export function CommandDispatchStep(providerName: string): Step {
@@ -68,17 +68,33 @@ index b7114a324..3f02804de 100644
        pr_body: "*Automated PR*",
        pr_title: `Automated SDK generation @ ${dir} \${{ steps.vars.outputs.commit-hash }}`,
        author_name: "pulumi-bot",
-@@ -570,9 +545,6 @@ export function CheckSchemaChanges(provider: string): Step {
+@@ -570,25 +545,6 @@ export function CheckSchemaChanges(provider: string): Step {
        "echo 'SCHEMA_CHANGES<<EOF' >> $GITHUB_ENV\n" +
        "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
        "echo 'EOF' >> $GITHUB_ENV",
 -    env: {
 -      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
 -    },
+-  };
+-}
+-
+-export function LabelIfNoBreakingChanges(provider: string): Step {
+-  if (provider === "command") {
+-    return {};
+-  }
+-  return {
+-    if: "contains(env.SCHEMA_CHANGES, 'Looking good! No breaking changes found.') && github.actor == 'pulumi-bot'",
+-    name: "Add label if no breaking changes",
+-    uses: action.addLabel,
+-    with: {
+-      labels: "impact/no-changelog-required",
+-      number: "${{ github.event.issue.number }}",
+-      github_token: "${{ secrets.GITHUB_TOKEN }}",
+-    },
    };
  }
  
-@@ -977,10 +949,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
+@@ -977,10 +933,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
          "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
        destination_branch: branch,
        pr_title: "Automated Pulumi/Pulumi upgrade",
@@ -89,7 +105,7 @@ index b7114a324..3f02804de 100644
      },
    };
  }
-@@ -995,7 +963,6 @@ export function SetPRAutoMerge(provider?: string): Step {
+@@ -995,7 +947,6 @@ export function SetPRAutoMerge(provider?: string): Step {
      if: "steps.create-pr.outputs.has_changed_files",
      uses: action.autoMerge,
      with: {
@@ -97,3 +113,98 @@ index b7114a324..3f02804de 100644
        "pull-request-number": "${{ steps.create-pr.outputs.pr_number }}",
        repository: "${{ github.repository }}",
        "merge-method": "squash",
+@@ -1036,19 +987,6 @@ go/**
+   };
+ }
+ 
+-export function NotifySlack(name: string): Step {
+-  return {
+-    if: "failure() && github.event_name == 'push'",
+-    name: "Notify Slack",
+-    uses: action.notifySlack,
+-    with: {
+-      author_name: `${name}`,
+-      fields: "repo,commit,author,action",
+-      status: "${{ job.status }}",
+-    },
+-  };
+-}
+-
+ export function DownloadSpecificSDKStep(name: string): Step {
+   return {
+     name: `Download ${name} SDK`,
+@@ -1130,21 +1068,6 @@ export function AzureLogin(provider: string): Step {
+   return {};
+ }
+ 
+-export function AwsCredentialsForArmCoverageReport(): Step {
+-  return {
+-    name: "Configure AWS Credentials",
+-    uses: action.configureAwsCredentials,
+-    with: {
+-      "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
+-      "aws-region": "us-west-2",
+-      "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
+-      "role-duration-seconds": 3600,
+-      "role-session-name": "arm2pulumiCvg@githubActions",
+-      "role-to-assume": "${{ secrets.AWS_CI_ROLE_ARN }}",
+-    },
+-  };
+-}
+-
+ export function MakeClean(): Step {
+   return {
+     name: "Cleanup SDK Folder",
+@@ -1159,13 +1082,6 @@ export function MakeLocalGenerate(): Step {
+   };
+ }
+ 
+-export function GenerateCoverageReport(): Step {
+-  return {
+-    name: "Generate coverage report",
+-    run: "make arm2pulumi_coverage_report",
+-  };
+-}
+-
+ export function TestResultsJSON(): Step {
+   return {
+     name: "Test usage of results.json",
+@@ -1173,20 +1089,10 @@ export function TestResultsJSON(): Step {
+   };
+ }
+ 
+-export function UploadArmCoverageToS3(): Step {
+-  return {
+-    name: "Upload results to S3",
+-    run: "cd provider/pkg/arm2pulumi/internal/test && bash s3-upload-script.sh",
+-  };
+-}
+-
+ export function PrepareGitBranchForSdkGeneration(): Step {
+   return {
+     name: "Preparing Git Branch",
+-    run:
+-      'git config --local user.email "bot@pulumi.com"\n' +
+-      'git config --local user.name "pulumi-bot"\n' +
+-      "git checkout -b generate-sdk/${{ github.run_id }}-${{ github.run_number }}\n",
++    run: "git checkout -b generate-sdk/${{ github.run_id }}-${{ github.run_number }}\n",
+   };
+ }
+ 
+@@ -1217,16 +1123,6 @@ export function MakeDiscovery(provider: string): Step {
+   return {};
+ }
+ 
+-export function Codecov(): Step {
+-  return {
+-    name: "Upload coverage reports to Codecov",
+-    uses: action.codecov,
+-    env: {
+-      CODECOV_TOKEN: "${{ secrets.CODECOV_TOKEN }}",
+-    },
+-  };
+-}
+-
+ export function FreeDiskSpace(runner: string): Step {
+   if (!runner.includes("ubuntu")) {
+     // This step is only relevant for the Ubuntu runner.
