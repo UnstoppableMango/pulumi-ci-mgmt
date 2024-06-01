@@ -1,0 +1,99 @@
+diff --git a/native-provider-ci/src/steps.ts b/native-provider-ci/src/steps.ts
+index b7114a324..3f02804de 100644
+--- a/native-provider-ci/src/steps.ts
++++ b/native-provider-ci/src/steps.ts
+@@ -28,7 +28,6 @@ export function CommandDispatchStep(providerName: string): Step {
+   return {
+     uses: action.slashCommand,
+     with: {
+-      token: "${{ secrets.PULUMI_BOT_TOKEN }}",
+       "reaction-token": "${{ secrets.GITHUB_TOKEN }}",
+       commands: "run-acceptance-tests",
+       permission: "write",
+@@ -38,19 +37,6 @@ export function CommandDispatchStep(providerName: string): Step {
+   };
+ }
+ 
+-export function CommentPRWithSlashCommandStep(): Step {
+-  return {
+-    name: "Comment PR",
+-    uses: action.prComment,
+-    with: {
+-      message:
+-        "PR is now waiting for a maintainer to run the acceptance tests.\n" +
+-        "**Note for the maintainer:** To run the acceptance tests, please comment */run-acceptance-tests* on the PR\n",
+-      GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
+-    },
+-  };
+-}
+-
+ export function CreateCommentsUrlStep(): Step {
+   return {
+     name: "Create URL to the run output",
+@@ -134,7 +120,6 @@ export function UpdatePRWithResultsStep(): Step {
+     name: "Update with Result",
+     uses: action.createOrUpdateComment,
+     with: {
+-      token: "${{ secrets.PULUMI_BOT_TOKEN }}",
+       repository:
+         "${{ github.event.client_payload.github.payload.repository.full_name }}",
+       "issue-number":
+@@ -346,9 +331,6 @@ export function DispatchDocsBuildEvent(): Step {
+   return {
+     name: "Dispatch Event",
+     run: "pulumictl create docs-build pulumi-${{ env.PROVIDER }} ${GITHUB_REF#refs/tags/}",
+-    env: {
+-      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
+-    },
+   };
+ }
+ 
+@@ -533,19 +515,12 @@ export function PullRequestSdkGeneration(
+   branch: string
+ ): Step {
+   let dir;
+-  if (provider === "azure-native") {
+-    dir = "azure-rest-api-specs";
+-  }
+-  if (provider === "aws-native") {
+-    dir = "aws-cloudformation-user-guide";
+-  }
+   const result = {
+     name: "Create PR",
+     id: "create-pr",
+     uses: action.pullRequest,
+     with: {
+       destination_branch: branch,
+-      github_token: "${{ secrets.PULUMI_BOT_TOKEN }}",
+       pr_body: "*Automated PR*",
+       pr_title: `Automated SDK generation @ ${dir} \${{ steps.vars.outputs.commit-hash }}`,
+       author_name: "pulumi-bot",
+@@ -570,9 +545,6 @@ export function CheckSchemaChanges(provider: string): Step {
+       "echo 'SCHEMA_CHANGES<<EOF' >> $GITHUB_ENV\n" +
+       "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
+       "echo 'EOF' >> $GITHUB_ENV",
+-    env: {
+-      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
+-    },
+   };
+ }
+ 
+@@ -977,10 +949,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
+         "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
+       destination_branch: branch,
+       pr_title: "Automated Pulumi/Pulumi upgrade",
+-      github_token: "${{ secrets.PULUMI_BOT_TOKEN }}",
+-    },
+-    env: {
+-      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
+     },
+   };
+ }
+@@ -995,7 +963,6 @@ export function SetPRAutoMerge(provider?: string): Step {
+     if: "steps.create-pr.outputs.has_changed_files",
+     uses: action.autoMerge,
+     with: {
+-      token: "${{ secrets.PULUMI_BOT_TOKEN }}",
+       "pull-request-number": "${{ steps.create-pr.outputs.pr_number }}",
+       repository: "${{ github.repository }}",
+       "merge-method": "squash",

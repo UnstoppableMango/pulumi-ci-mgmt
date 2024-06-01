@@ -1,7 +1,16 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index 300f8bf03..d3fd33cbf 100644
+index 300f8bf03..7d0fdbcd7 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
+@@ -4,7 +4,7 @@ import * as steps from "./steps";
+ import { Step } from "./steps";
+ 
+ const pythonVersion = "3.11";
+-const goVersion = "1.21.x";
++const goVersion = "1.22.x";
+ const nodeVersion = "20.x";
+ const dotnetVersion = "6.0.x\n3.1.301\n";
+ const javaVersion = "11";
 @@ -32,7 +32,6 @@ export const WorkflowOpts = z.object({
  const env = (opts: WorkflowOpts) =>
    Object.assign(
