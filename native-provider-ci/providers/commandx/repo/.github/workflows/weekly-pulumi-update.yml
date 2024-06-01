@@ -15,7 +15,7 @@ env:
   PYPI_USERNAME: __token__
   PYPI_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
   PULUMI_GO_DEP_ROOT: ${{ github.workspace }}/..
-  GOVERSION: 1.21.x
+  GOVERSION: 1.22.x
   NODEVERSION: 20.x
   PYTHONVERSION: "3.11"
   DOTNETVERSION: |
@@ -113,7 +113,4 @@ jobs:
         source_branch: update-pulumi/${{ github.run_id }}-${{ github.run_number }}
         destination_branch: master
         pr_title: Automated Pulumi/Pulumi upgrade
-        github_token: ${{ secrets.PULUMI_BOT_TOKEN }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.PULUMI_BOT_TOKEN }}
     name: weekly-pulumi-update
