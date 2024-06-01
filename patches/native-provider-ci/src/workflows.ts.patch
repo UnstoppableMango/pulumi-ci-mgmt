@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index e66582228..fc5742927 100644
+index 300f8bf03..74340ea6b 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
 @@ -32,7 +32,6 @@ export const WorkflowOpts = z.object({

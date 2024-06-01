@@ -90,9 +90,8 @@ export function PullRequestWorkflow(
     },
     env: env(opts),
     jobs: {
-      "comment-on-pr": new EmptyJob("comment-on-pr").addStep(
-        steps.CheckoutRepoStep()
-      ),
+      "comment-on-pr": new EmptyJob("comment-on-pr")
+        .addStep(steps.CheckoutRepoStep()),
     },
   };
 }
@@ -135,7 +134,7 @@ export function RunAcceptanceTestsWorkflow(
         .addConditional(
           "github.event_name == 'repository_dispatch' || github.event.pull_request.head.repo.full_name == github.repository"
         )
-        .addStep(steps.EchoSuccessStep())
+        .addStep(steps.SentinelStep())
         .addNeeds(calculateSentinelNeeds(name, opts.lint, opts.provider)),
     },
   };
