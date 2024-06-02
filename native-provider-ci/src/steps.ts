@@ -439,7 +439,8 @@ sdk/**/pulumi-plugin.json
 sdk/dotnet/*.csproj
 sdk/go/**/pulumiUtilities.go
 sdk/nodejs/package.json
-sdk/python/pyproject.toml`,
+sdk/python/pyproject.toml
+sdk/java/build.gradle`,
     },
   };
 }
