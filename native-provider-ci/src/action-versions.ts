@@ -3,7 +3,7 @@ export const goLint = "golangci/golangci-lint-action@v4";
 export const setupGo = "actions/setup-go@v5";
 export const setupDotNet = "actions/setup-dotnet@v4";
 export const setupJava = "actions/setup-java@v4";
-export const setupGradle = "gradle/gradle-build-action@v3";
+export const setupGradle = "gradle/actions/setup-gradle@v3";
 export const setupNode = "actions/setup-node@v4";
 export const setupPython = "actions/setup-python@v5";
 
@@ -14,7 +14,7 @@ export const googleAuth = "google-github-actions/auth@v0";
 
 // Tools
 export const goReleaser = "goreleaser/goreleaser-action@v5";
-export const gradleBuildAction = "gradle/gradle-build-action@v3";
+export const gradleBuildAction = "gradle/actions/setup-gradle@v3";
 export const installGhRelease = "jaxxstorm/action-install-gh-release@v1.11.0";
 export const installPulumiCli = "pulumi/actions@v5";
 export const codecov = "codecov/codecov-action@v4";
