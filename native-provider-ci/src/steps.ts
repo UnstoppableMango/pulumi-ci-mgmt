@@ -28,25 +28,11 @@ export function CommandDispatchStep(providerName: string): Step {
   return {
     uses: action.slashCommand,
     with: {
-      token: "${{ secrets.PULUMI_BOT_TOKEN }}",
       "reaction-token": "${{ secrets.GITHUB_TOKEN }}",
       commands: "run-acceptance-tests",
       permission: "write",
       "issue-type": "pull-request",
       repository: `pulumi/pulumi-${providerName}`,
-    },
-  };
-}
-
-export function CommentPRWithSlashCommandStep(): Step {
-  return {
-    name: "Comment PR",
-    uses: action.prComment,
-    with: {
-      message:
-        "PR is now waiting for a maintainer to run the acceptance tests.\n" +
-        "**Note for the maintainer:** To run the acceptance tests, please comment */run-acceptance-tests* on the PR\n",
-      GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}",
     },
   };
 }
@@ -134,7 +120,6 @@ export function UpdatePRWithResultsStep(): Step {
     name: "Update with Result",
     uses: action.createOrUpdateComment,
     with: {
-      token: "${{ secrets.PULUMI_BOT_TOKEN }}",
       repository:
         "${{ github.event.client_payload.github.payload.repository.full_name }}",
       "issue-number":
@@ -197,40 +182,6 @@ export function SetupGCloud(requiresGcp?: boolean): Step {
     };
   }
   return {};
-}
-
-export function ConfigureAwsCredentialsForTests(requiresAws?: boolean): Step {
-  if (requiresAws) {
-    return {
-      name: "Configure AWS Credentials",
-      uses: action.configureAwsCredentials,
-      with: {
-        "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
-        "aws-region": "${{ env.AWS_REGION }}",
-        "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-        "role-duration-seconds": 3600,
-        "role-session-name": "${{ env.PROVIDER }}@githubActions",
-        "role-to-assume": "${{ secrets.AWS_CI_ROLE_ARN }}",
-      },
-    };
-  }
-  return {};
-}
-
-export function ConfigureAwsCredentialsForPublish(): Step {
-  return {
-    name: "Configure AWS Credentials",
-    uses: action.configureAwsCredentials,
-    with: {
-      "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
-      "aws-region": "us-east-2",
-      "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-      "role-duration-seconds": 7200,
-      "role-session-name": "${{ env.PROVIDER }}@githubActions",
-      "role-external-id": "upload-pulumi-release",
-      "role-to-assume": "${{ secrets.AWS_UPLOAD_ROLE_ARN }}",
-    },
-  };
 }
 
 export function InstallGo(version?: string): Step {
@@ -346,9 +297,6 @@ export function DispatchDocsBuildEvent(): Step {
   return {
     name: "Dispatch Event",
     run: "pulumictl create docs-build pulumi-${{ env.PROVIDER }} ${GITHUB_REF#refs/tags/}",
-    env: {
-      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
-    },
   };
 }
 
@@ -533,19 +481,12 @@ export function PullRequestSdkGeneration(
   branch: string
 ): Step {
   let dir;
-  if (provider === "azure-native") {
-    dir = "azure-rest-api-specs";
-  }
-  if (provider === "aws-native") {
-    dir = "aws-cloudformation-user-guide";
-  }
   const result = {
     name: "Create PR",
     id: "create-pr",
     uses: action.pullRequest,
     with: {
       destination_branch: branch,
-      github_token: "${{ secrets.PULUMI_BOT_TOKEN }}",
       pr_body: "*Automated PR*",
       pr_title: `Automated SDK generation @ ${dir} \${{ steps.vars.outputs.commit-hash }}`,
       author_name: "pulumi-bot",
@@ -570,25 +511,6 @@ export function CheckSchemaChanges(provider: string): Step {
       "echo 'SCHEMA_CHANGES<<EOF' >> $GITHUB_ENV\n" +
       "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
       "echo 'EOF' >> $GITHUB_ENV",
-    env: {
-      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
-    },
-  };
-}
-
-export function LabelIfNoBreakingChanges(provider: string): Step {
-  if (provider === "command") {
-    return {};
-  }
-  return {
-    if: "contains(env.SCHEMA_CHANGES, 'Looking good! No breaking changes found.') && github.actor == 'pulumi-bot'",
-    name: "Add label if no breaking changes",
-    uses: action.addLabel,
-    with: {
-      labels: "impact/no-changelog-required",
-      number: "${{ github.event.issue.number }}",
-      github_token: "${{ secrets.GITHUB_TOKEN }}",
-    },
   };
 }
 
@@ -929,8 +851,6 @@ export function UpdatePulumi(): Step {
     name: "Update Pulumi/Pulumi",
     id: "gomod",
     run:
-      "git config --local user.email 'bot@pulumi.com'\n" +
-      "git config --local user.name 'pulumi-bot'\n" +
       "git checkout -b update-pulumi/${{ github.run_id }}-${{ github.run_number }}\n" +
       "for MODFILE in $(find . -name go.mod); do pushd $(dirname $MODFILE); go get github.com/pulumi/pulumi/pkg/v3 github.com/pulumi/pulumi/sdk/v3; go mod tidy; popd; done\n" +
       // Fetch latest release version of Pulumi, remove the leading 'v' and store it to the `.pulumi.version` file.
@@ -977,10 +897,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
         "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
       destination_branch: branch,
       pr_title: "Automated Pulumi/Pulumi upgrade",
-      github_token: "${{ secrets.PULUMI_BOT_TOKEN }}",
-    },
-    env: {
-      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
     },
   };
 }
@@ -995,7 +911,6 @@ export function SetPRAutoMerge(provider?: string): Step {
     if: "steps.create-pr.outputs.has_changed_files",
     uses: action.autoMerge,
     with: {
-      token: "${{ secrets.PULUMI_BOT_TOKEN }}",
       "pull-request-number": "${{ steps.create-pr.outputs.pr_number }}",
       repository: "${{ github.repository }}",
       "merge-method": "squash",
@@ -1036,19 +951,6 @@ go/**
   };
 }
 
-export function NotifySlack(name: string): Step {
-  return {
-    if: "failure() && github.event_name == 'push'",
-    name: "Notify Slack",
-    uses: action.notifySlack,
-    with: {
-      author_name: `${name}`,
-      fields: "repo,commit,author,action",
-      status: "${{ job.status }}",
-    },
-  };
-}
-
 export function DownloadSpecificSDKStep(name: string): Step {
   return {
     name: `Download ${name} SDK`,
@@ -1077,7 +979,7 @@ export function InstallTwine(): Step {
 export function RunPublishSDK(): Step {
   return {
     name: "Publish SDKs",
-    run: "./ci-scripts/ci/publish-tfgen-package ${{ github.workspace }}",
+    run: "./scripts/publish_sdks.sh ${{ github.workspace }}",
     env: {
       NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}",
       // See https://github.com/pulumi/scripts/pull/138/files
@@ -1130,21 +1032,6 @@ export function AzureLogin(provider: string): Step {
   return {};
 }
 
-export function AwsCredentialsForArmCoverageReport(): Step {
-  return {
-    name: "Configure AWS Credentials",
-    uses: action.configureAwsCredentials,
-    with: {
-      "aws-access-key-id": "${{ secrets.AWS_ACCESS_KEY_ID }}",
-      "aws-region": "us-west-2",
-      "aws-secret-access-key": "${{ secrets.AWS_SECRET_ACCESS_KEY }}",
-      "role-duration-seconds": 3600,
-      "role-session-name": "arm2pulumiCvg@githubActions",
-      "role-to-assume": "${{ secrets.AWS_CI_ROLE_ARN }}",
-    },
-  };
-}
-
 export function MakeClean(): Step {
   return {
     name: "Cleanup SDK Folder",
@@ -1159,13 +1046,6 @@ export function MakeLocalGenerate(): Step {
   };
 }
 
-export function GenerateCoverageReport(): Step {
-  return {
-    name: "Generate coverage report",
-    run: "make arm2pulumi_coverage_report",
-  };
-}
-
 export function TestResultsJSON(): Step {
   return {
     name: "Test usage of results.json",
@@ -1173,20 +1053,10 @@ export function TestResultsJSON(): Step {
   };
 }
 
-export function UploadArmCoverageToS3(): Step {
-  return {
-    name: "Upload results to S3",
-    run: "cd provider/pkg/arm2pulumi/internal/test && bash s3-upload-script.sh",
-  };
-}
-
 export function PrepareGitBranchForSdkGeneration(): Step {
   return {
     name: "Preparing Git Branch",
-    run:
-      'git config --local user.email "bot@pulumi.com"\n' +
-      'git config --local user.name "pulumi-bot"\n' +
-      "git checkout -b generate-sdk/${{ github.run_id }}-${{ github.run_number }}\n",
+    run: "git checkout -b generate-sdk/${{ github.run_id }}-${{ github.run_number }}\n",
   };
 }
 
@@ -1215,16 +1085,6 @@ export function MakeDiscovery(provider: string): Step {
     };
   }
   return {};
-}
-
-export function Codecov(): Step {
-  return {
-    name: "Upload coverage reports to Codecov",
-    uses: action.codecov,
-    env: {
-      CODECOV_TOKEN: "${{ secrets.CODECOV_TOKEN }}",
-    },
-  };
 }
 
 export function FreeDiskSpace(runner: string): Step {

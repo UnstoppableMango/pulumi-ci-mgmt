@@ -1,3 +1,6 @@
 [submodule "vendor/github.com/pulumi/ci-mgmt"]
 	path = vendor/github.com/pulumi/ci-mgmt
 	url = https://github.com/pulumi/ci-mgmt
+[submodule "vendor/github.com/pulumi/scripts"]
+	path = vendor/github.com/pulumi/scripts
+	url = https://github.com/pulumi/scripts

@@ -3,3 +3,5 @@ gihtub-org: unmango
 major-version: 0
 hasGenBinary: false
 enableChangelog: true
+lint: false
+defaultBranch: main
