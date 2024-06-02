@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index 300f8bf03..0645e88e2 100644
+index 300f8bf03..86675e927 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
 @@ -4,7 +4,7 @@ import * as steps from "./steps";
@@ -59,7 +59,37 @@ index 300f8bf03..0645e88e2 100644
          "paths-ignore": ["CHANGELOG.md"],
          "tags-ignore": ["v*", "sdk/*", "**"],
        },
-@@ -375,63 +364,12 @@ export function Cf2PulumiReleaseWorkflow(
+@@ -208,7 +197,8 @@ export function BuildWorkflow(
+       test: new TestsJob(name, "test", opts),
+       publish: new PublishPrereleaseJob("publish", opts),
+       publish_sdk: new PublishSDKJob("publish_sdk"),
+-      publish_java_sdk: new PublishJavaSDKJob("publish_java_sdk"),
++      // I don't understand java publishing
++      // publish_java_sdk: new PublishJavaSDKJob("publish_java_sdk"),
+     },
+   };
+   if (opts.lint) {
+@@ -252,7 +242,8 @@ export function PrereleaseWorkflow(
+       test: new TestsJob(name, "test", opts),
+       publish: new PublishPrereleaseJob("publish", opts),
+       publish_sdk: new PublishSDKJob("publish_sdk"),
+-      publish_java_sdk: new PublishJavaSDKJob("publish_java_sdk"),
++      // I don't understand java publishing
++      // publish_java_sdk: new PublishJavaSDKJob("publish_java_sdk"),
+       publish_go_sdk: new PublishGoSdkJob(),
+     },
+   };
+@@ -289,7 +280,8 @@ export function ReleaseWorkflow(
+       test: new TestsJob(name, "test", opts),
+       publish: new PublishJob("publish", opts),
+       publish_sdk: new PublishSDKJob("publish_sdks"),
+-      publish_java_sdk: new PublishJavaSDKJob("publish_java_sdk"),
++      // I don't understand java publishing
++      // publish_java_sdk: new PublishJavaSDKJob("publish_java_sdk"),
+       publish_go_sdk: new PublishGoSdkJob(),
+       dispatch_docs_build: new DocsBuildDispatchJob("dispatch_docs_build"),
+     },
+@@ -375,63 +367,12 @@ export function Cf2PulumiReleaseWorkflow(
    };
  }
  
@@ -124,7 +154,7 @@ index 300f8bf03..0645e88e2 100644
  
    strategy = {
      "fail-fast": true,
-@@ -473,7 +411,6 @@ export class BuildSdkJob implements NormalJob {
+@@ -473,7 +414,6 @@ export class BuildSdkJob implements NormalJob {
        steps.Porcelain(),
        steps.ZipSDKsStep(),
        steps.UploadSDKs(tag),
@@ -132,7 +162,7 @@ index 300f8bf03..0645e88e2 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -521,15 +458,12 @@ export class PrerequisitesJob implements NormalJob {
+@@ -521,15 +461,12 @@ export class PrerequisitesJob implements NormalJob {
        steps.MakeKubernetesProvider(opts.provider),
        steps.CheckSchemaChanges(opts.provider),
        steps.CommentSchemaChangesOnPR(opts.provider),
@@ -148,7 +178,7 @@ index 300f8bf03..0645e88e2 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -547,7 +481,7 @@ export class PrerequisitesJob implements NormalJob {
+@@ -547,7 +484,7 @@ export class PrerequisitesJob implements NormalJob {
  }
  
  export class TestsJob implements NormalJob {
@@ -157,7 +187,7 @@ index 300f8bf03..0645e88e2 100644
  
    needs = ["build_sdks"];
    strategy = {
-@@ -606,7 +540,6 @@ export class TestsJob implements NormalJob {
+@@ -606,7 +543,6 @@ export class TestsJob implements NormalJob {
        steps.InstallSDKDeps(),
        steps.MakeKubeDir(opts.provider, workflowName),
        steps.DownloadKubeconfig(opts.provider, workflowName),
@@ -165,7 +195,7 @@ index 300f8bf03..0645e88e2 100644
        steps.GoogleAuth(opts.gcp),
        steps.SetupGCloud(opts.gcp),
        steps.InstallKubectl(opts.provider),
-@@ -614,7 +547,6 @@ export class TestsJob implements NormalJob {
+@@ -614,7 +550,6 @@ export class TestsJob implements NormalJob {
        steps.SetupGotestfmt(),
        steps.CreateKindCluster(opts.provider, workflowName),
        steps.RunTests(opts.provider, workflowName),
@@ -173,7 +203,7 @@ index 300f8bf03..0645e88e2 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name: jobName });
    }
-@@ -759,11 +691,9 @@ export class PublishPrereleaseJob implements NormalJob {
+@@ -759,11 +694,9 @@ export class PublishPrereleaseJob implements NormalJob {
        steps.FreeDiskSpace(this["runs-on"]),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -185,7 +215,7 @@ index 300f8bf03..0645e88e2 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -788,11 +718,9 @@ export class PublishJob implements NormalJob {
+@@ -788,11 +721,9 @@ export class PublishJob implements NormalJob {
        steps.FreeDiskSpace(this["runs-on"]),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -197,7 +227,7 @@ index 300f8bf03..0645e88e2 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
    }
  }
-@@ -824,7 +752,6 @@ export class PublishSDKJob implements NormalJob {
+@@ -824,7 +755,6 @@ export class PublishSDKJob implements NormalJob {
        steps.UnzipSpecificSDKStep("nodejs"),
        steps.InstallTwine(),
        steps.RunPublishSDK(),
@@ -205,7 +235,7 @@ index 300f8bf03..0645e88e2 100644
      ];
    }
  }
-@@ -918,32 +845,6 @@ export class Arm2PulumiRelease implements NormalJob {
+@@ -918,32 +848,6 @@ export class Arm2PulumiRelease implements NormalJob {
    }
  }
  
@@ -238,7 +268,7 @@ index 300f8bf03..0645e88e2 100644
  export class WeeklyPulumiUpdate implements NormalJob {
    "runs-on" = "ubuntu-latest";
    steps: NormalJob["steps"];
-@@ -983,7 +884,6 @@ export class NightlySdkGeneration implements NormalJob {
+@@ -983,7 +887,6 @@ export class NightlySdkGeneration implements NormalJob {
        steps.InstallGo(goVersion),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -246,7 +276,7 @@ index 300f8bf03..0645e88e2 100644
        steps.AzureLogin(opts.provider),
        steps.MakeClean(),
        steps.PrepareGitBranchForSdkGeneration(),
-@@ -996,7 +896,6 @@ export class NightlySdkGeneration implements NormalJob {
+@@ -996,7 +899,6 @@ export class NightlySdkGeneration implements NormalJob {
        steps.CommitAutomatedSDKUpdates(opts.provider),
        steps.PullRequestSdkGeneration(opts.provider, opts.defaultBranch),
        // steps.SetPRAutoMerge(opts.provider),
