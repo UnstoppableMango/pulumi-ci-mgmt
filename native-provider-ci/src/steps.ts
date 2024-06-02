@@ -509,7 +509,7 @@ export function CheckSchemaChanges(provider: string): Step {
     name: "Check Schema is Valid",
     run:
       "echo 'SCHEMA_CHANGES<<EOF' >> $GITHUB_ENV\n" +
-      "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
+      "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json --repository=github://api.github.com/unstoppablemango >> $GITHUB_ENV\n" +
       "echo 'EOF' >> $GITHUB_ENV",
   };
 }
