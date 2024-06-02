@@ -62,11 +62,8 @@ jobs:
     - name: Update Pulumi/Pulumi
       id: gomod
       run: >-
-        git config --local user.email 'bot@pulumi.com'
-
-        git config --local user.name 'pulumi-bot'
-
-        git checkout -b update-pulumi/${{ github.run_id }}-${{ github.run_number }}
+        git checkout -b update-pulumi/${{ github.run_id }}-${{ github.run_number
+        }}
 
         for MODFILE in $(find . -name go.mod); do pushd $(dirname $MODFILE); go get github.com/pulumi/pulumi/pkg/v3 github.com/pulumi/pulumi/sdk/v3; go mod tidy; popd; done
 
@@ -111,6 +108,6 @@ jobs:
       uses: repo-sync/pull-request@v2.6.2
       with:
         source_branch: update-pulumi/${{ github.run_id }}-${{ github.run_number }}
-        destination_branch: master
+        destination_branch: main
         pr_title: Automated Pulumi/Pulumi upgrade
     name: weekly-pulumi-update
