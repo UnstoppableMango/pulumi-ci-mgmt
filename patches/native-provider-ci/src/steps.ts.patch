@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/steps.ts b/native-provider-ci/src/steps.ts
-index b7114a324..14e279938 100644
+index b7114a324..ced4a8f07 100644
 --- a/native-provider-ci/src/steps.ts
 +++ b/native-provider-ci/src/steps.ts
 @@ -28,7 +28,6 @@ export function CommandDispatchStep(providerName: string): Step {
@@ -148,7 +148,12 @@ index b7114a324..14e279938 100644
        "git checkout -b update-pulumi/${{ github.run_id }}-${{ github.run_number }}\n" +
        "for MODFILE in $(find . -name go.mod); do pushd $(dirname $MODFILE); go get github.com/pulumi/pulumi/pkg/v3 github.com/pulumi/pulumi/sdk/v3; go mod tidy; popd; done\n" +
        // Fetch latest release version of Pulumi, remove the leading 'v' and store it to the `.pulumi.version` file.
-@@ -977,10 +898,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
+@@ -973,14 +894,11 @@ export function CreateUpdatePulumiPR(branch: string): Step {
+     if: "steps.gomod.outputs.changes != 0",
+     uses: action.pullRequest,
+     with: {
++      github_token: "${{ secrets.GITHUB_TOKEN }}",
+       source_branch:
          "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
        destination_branch: branch,
        pr_title: "Automated Pulumi/Pulumi upgrade",
@@ -159,7 +164,7 @@ index b7114a324..14e279938 100644
      },
    };
  }
-@@ -995,7 +912,6 @@ export function SetPRAutoMerge(provider?: string): Step {
+@@ -995,7 +913,6 @@ export function SetPRAutoMerge(provider?: string): Step {
      if: "steps.create-pr.outputs.has_changed_files",
      uses: action.autoMerge,
      with: {
@@ -167,7 +172,7 @@ index b7114a324..14e279938 100644
        "pull-request-number": "${{ steps.create-pr.outputs.pr_number }}",
        repository: "${{ github.repository }}",
        "merge-method": "squash",
-@@ -1036,19 +952,6 @@ go/**
+@@ -1036,19 +953,6 @@ go/**
    };
  }
  
@@ -187,7 +192,7 @@ index b7114a324..14e279938 100644
  export function DownloadSpecificSDKStep(name: string): Step {
    return {
      name: `Download ${name} SDK`,
-@@ -1077,7 +980,7 @@ export function InstallTwine(): Step {
+@@ -1077,7 +981,7 @@ export function InstallTwine(): Step {
  export function RunPublishSDK(): Step {
    return {
      name: "Publish SDKs",
@@ -196,7 +201,7 @@ index b7114a324..14e279938 100644
      env: {
        NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}",
        // See https://github.com/pulumi/scripts/pull/138/files
-@@ -1130,21 +1033,6 @@ export function AzureLogin(provider: string): Step {
+@@ -1130,21 +1034,6 @@ export function AzureLogin(provider: string): Step {
    return {};
  }
  
@@ -218,7 +223,7 @@ index b7114a324..14e279938 100644
  export function MakeClean(): Step {
    return {
      name: "Cleanup SDK Folder",
-@@ -1159,13 +1047,6 @@ export function MakeLocalGenerate(): Step {
+@@ -1159,13 +1048,6 @@ export function MakeLocalGenerate(): Step {
    };
  }
  
@@ -232,7 +237,7 @@ index b7114a324..14e279938 100644
  export function TestResultsJSON(): Step {
    return {
      name: "Test usage of results.json",
-@@ -1173,20 +1054,10 @@ export function TestResultsJSON(): Step {
+@@ -1173,20 +1055,10 @@ export function TestResultsJSON(): Step {
    };
  }
  
@@ -254,7 +259,7 @@ index b7114a324..14e279938 100644
    };
  }
  
-@@ -1217,16 +1088,6 @@ export function MakeDiscovery(provider: string): Step {
+@@ -1217,16 +1089,6 @@ export function MakeDiscovery(provider: string): Step {
    return {};
  }
  

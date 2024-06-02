@@ -894,6 +894,7 @@ export function CreateUpdatePulumiPR(branch: string): Step {
     if: "steps.gomod.outputs.changes != 0",
     uses: action.pullRequest,
     with: {
+      github_token: "${{ secrets.GITHUB_TOKEN }}",
       source_branch:
         "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
       destination_branch: branch,
