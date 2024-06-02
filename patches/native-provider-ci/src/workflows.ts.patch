@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index 300f8bf03..61901979a 100644
+index 300f8bf03..2f3eba0ba 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
 @@ -4,7 +4,7 @@ import * as steps from "./steps";
@@ -41,7 +41,7 @@ index 300f8bf03..61901979a 100644
        GOVERSION: goVersion,
        NODEVERSION: nodeVersion,
        PYTHONVERSION: pythonVersion,
-@@ -98,12 +90,9 @@ export function PullRequestWorkflow(
+@@ -98,12 +90,11 @@ export function PullRequestWorkflow(
      },
      env: env(opts),
      jobs: {
@@ -51,13 +51,15 @@ index 300f8bf03..61901979a 100644
 -        )
 -        .addStep(steps.CheckoutRepoStep())
 -        .addStep(steps.CommentPRWithSlashCommandStep()),
-+      "comment-on-pr": new EmptyJob("comment-on-pr").addStep(
-+        steps.CheckoutRepoStep()
++      prerequisites: new PrerequisitesJob("prerequisites", opts),
++      build_sdks: new BuildSdkJob("build_sdks", opts, false).addRunsOn(
++        opts.provider
 +      ),
++      test: new TestsJob(name, "test", opts),
      },
    };
  }
-@@ -120,7 +109,7 @@ export function RunAcceptanceTestsWorkflow(
+@@ -120,7 +111,7 @@ export function RunAcceptanceTestsWorkflow(
          types: ["run-acceptance-tests-command"],
        },
        pull_request: {
@@ -66,7 +68,7 @@ index 300f8bf03..61901979a 100644
          "paths-ignore": ["CHANGELOG.md"],
        },
        workflow_dispatch: {},
-@@ -158,7 +147,7 @@ export function RunAcceptanceTestsWorkflow(
+@@ -158,7 +149,7 @@ export function RunAcceptanceTestsWorkflow(
    if (opts.provider === "kubernetes") {
      workflow.on = Object.assign(workflow.on, {
        pull_request: {
@@ -75,7 +77,7 @@ index 300f8bf03..61901979a 100644
          "paths-ignore": ["CHANGELOG.md"],
        },
      });
-@@ -193,7 +182,7 @@ export function BuildWorkflow(
+@@ -193,7 +184,7 @@ export function BuildWorkflow(
      name: name,
      on: {
        push: {
@@ -84,7 +86,7 @@ index 300f8bf03..61901979a 100644
          "paths-ignore": ["CHANGELOG.md"],
          "tags-ignore": ["v*", "sdk/*", "**"],
        },
-@@ -208,7 +197,8 @@ export function BuildWorkflow(
+@@ -208,7 +199,8 @@ export function BuildWorkflow(
        test: new TestsJob(name, "test", opts),
        publish: new PublishPrereleaseJob("publish", opts),
        publish_sdk: new PublishSDKJob("publish_sdk"),
@@ -94,7 +96,7 @@ index 300f8bf03..61901979a 100644
      },
    };
    if (opts.lint) {
-@@ -252,7 +242,8 @@ export function PrereleaseWorkflow(
+@@ -252,7 +244,8 @@ export function PrereleaseWorkflow(
        test: new TestsJob(name, "test", opts),
        publish: new PublishPrereleaseJob("publish", opts),
        publish_sdk: new PublishSDKJob("publish_sdk"),
@@ -104,7 +106,7 @@ index 300f8bf03..61901979a 100644
        publish_go_sdk: new PublishGoSdkJob(),
      },
    };
-@@ -289,7 +280,8 @@ export function ReleaseWorkflow(
+@@ -289,7 +282,8 @@ export function ReleaseWorkflow(
        test: new TestsJob(name, "test", opts),
        publish: new PublishJob("publish", opts),
        publish_sdk: new PublishSDKJob("publish_sdks"),
@@ -114,7 +116,7 @@ index 300f8bf03..61901979a 100644
        publish_go_sdk: new PublishGoSdkJob(),
        dispatch_docs_build: new DocsBuildDispatchJob("dispatch_docs_build"),
      },
-@@ -375,63 +367,12 @@ export function Cf2PulumiReleaseWorkflow(
+@@ -375,63 +369,12 @@ export function Cf2PulumiReleaseWorkflow(
    };
  }
  
@@ -179,7 +181,7 @@ index 300f8bf03..61901979a 100644
  
    strategy = {
      "fail-fast": true,
-@@ -473,7 +414,6 @@ export class BuildSdkJob implements NormalJob {
+@@ -473,7 +416,6 @@ export class BuildSdkJob implements NormalJob {
        steps.Porcelain(),
        steps.ZipSDKsStep(),
        steps.UploadSDKs(tag),
@@ -187,7 +189,7 @@ index 300f8bf03..61901979a 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -521,15 +461,13 @@ export class PrerequisitesJob implements NormalJob {
+@@ -521,15 +463,13 @@ export class PrerequisitesJob implements NormalJob {
        steps.MakeKubernetesProvider(opts.provider),
        steps.CheckSchemaChanges(opts.provider),
        steps.CommentSchemaChangesOnPR(opts.provider),
@@ -205,7 +207,7 @@ index 300f8bf03..61901979a 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -547,7 +485,7 @@ export class PrerequisitesJob implements NormalJob {
+@@ -547,7 +487,7 @@ export class PrerequisitesJob implements NormalJob {
  }
  
  export class TestsJob implements NormalJob {
@@ -214,7 +216,7 @@ index 300f8bf03..61901979a 100644
  
    needs = ["build_sdks"];
    strategy = {
-@@ -606,7 +544,6 @@ export class TestsJob implements NormalJob {
+@@ -606,7 +546,6 @@ export class TestsJob implements NormalJob {
        steps.InstallSDKDeps(),
        steps.MakeKubeDir(opts.provider, workflowName),
        steps.DownloadKubeconfig(opts.provider, workflowName),
@@ -222,7 +224,7 @@ index 300f8bf03..61901979a 100644
        steps.GoogleAuth(opts.gcp),
        steps.SetupGCloud(opts.gcp),
        steps.InstallKubectl(opts.provider),
-@@ -614,7 +551,6 @@ export class TestsJob implements NormalJob {
+@@ -614,7 +553,6 @@ export class TestsJob implements NormalJob {
        steps.SetupGotestfmt(),
        steps.CreateKindCluster(opts.provider, workflowName),
        steps.RunTests(opts.provider, workflowName),
@@ -230,7 +232,7 @@ index 300f8bf03..61901979a 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name: jobName });
    }
-@@ -759,11 +695,9 @@ export class PublishPrereleaseJob implements NormalJob {
+@@ -759,11 +697,9 @@ export class PublishPrereleaseJob implements NormalJob {
        steps.FreeDiskSpace(this["runs-on"]),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -242,7 +244,7 @@ index 300f8bf03..61901979a 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -788,11 +722,9 @@ export class PublishJob implements NormalJob {
+@@ -788,11 +724,9 @@ export class PublishJob implements NormalJob {
        steps.FreeDiskSpace(this["runs-on"]),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -254,7 +256,7 @@ index 300f8bf03..61901979a 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
    }
  }
-@@ -824,7 +756,6 @@ export class PublishSDKJob implements NormalJob {
+@@ -824,7 +758,6 @@ export class PublishSDKJob implements NormalJob {
        steps.UnzipSpecificSDKStep("nodejs"),
        steps.InstallTwine(),
        steps.RunPublishSDK(),
@@ -262,7 +264,7 @@ index 300f8bf03..61901979a 100644
      ];
    }
  }
-@@ -918,32 +849,6 @@ export class Arm2PulumiRelease implements NormalJob {
+@@ -918,32 +851,6 @@ export class Arm2PulumiRelease implements NormalJob {
    }
  }
  
@@ -295,7 +297,7 @@ index 300f8bf03..61901979a 100644
  export class WeeklyPulumiUpdate implements NormalJob {
    "runs-on" = "ubuntu-latest";
    steps: NormalJob["steps"];
-@@ -983,7 +888,6 @@ export class NightlySdkGeneration implements NormalJob {
+@@ -983,7 +890,6 @@ export class NightlySdkGeneration implements NormalJob {
        steps.InstallGo(goVersion),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -303,7 +305,7 @@ index 300f8bf03..61901979a 100644
        steps.AzureLogin(opts.provider),
        steps.MakeClean(),
        steps.PrepareGitBranchForSdkGeneration(),
-@@ -996,7 +900,6 @@ export class NightlySdkGeneration implements NormalJob {
+@@ -996,7 +902,6 @@ export class NightlySdkGeneration implements NormalJob {
        steps.CommitAutomatedSDKUpdates(opts.provider),
        steps.PullRequestSdkGeneration(opts.provider, opts.defaultBranch),
        // steps.SetPRAutoMerge(opts.provider),

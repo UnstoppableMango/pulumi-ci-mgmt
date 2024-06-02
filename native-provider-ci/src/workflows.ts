@@ -90,9 +90,11 @@ export function PullRequestWorkflow(
     },
     env: env(opts),
     jobs: {
-      "comment-on-pr": new EmptyJob("comment-on-pr").addStep(
-        steps.CheckoutRepoStep()
+      prerequisites: new PrerequisitesJob("prerequisites", opts),
+      build_sdks: new BuildSdkJob("build_sdks", opts, false).addRunsOn(
+        opts.provider
       ),
+      test: new TestsJob(name, "test", opts),
     },
   };
 }
