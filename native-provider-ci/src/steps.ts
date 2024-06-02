@@ -487,6 +487,7 @@ export function PullRequestSdkGeneration(
     uses: action.pullRequest,
     with: {
       destination_branch: branch,
+      github_token: "${{ secrets.GITHUB_TOKEN }}",
       pr_body: "*Automated PR*",
       pr_title: `Automated SDK generation @ ${dir} \${{ steps.vars.outputs.commit-hash }}`,
       author_name: "pulumi-bot",
