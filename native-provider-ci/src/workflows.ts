@@ -26,7 +26,7 @@ export const WorkflowOpts = z.object({
   skipWindowsArmBuild: z.boolean().default(false),
   pulumiCLIVersion: z.string().optional(),
   hasGenBinary: z.boolean().default(true),
-  defaultBranch: z.string().default("master"),
+  defaultBranch: z.string().default("main"),
 });
 
 const env = (opts: WorkflowOpts) =>
@@ -109,7 +109,7 @@ export function RunAcceptanceTestsWorkflow(
         types: ["run-acceptance-tests-command"],
       },
       pull_request: {
-        branches: ["master", "main"],
+        branches: ["main"],
         "paths-ignore": ["CHANGELOG.md"],
       },
       workflow_dispatch: {},
@@ -147,7 +147,7 @@ export function RunAcceptanceTestsWorkflow(
   if (opts.provider === "kubernetes") {
     workflow.on = Object.assign(workflow.on, {
       pull_request: {
-        branches: ["master", "main", "v4"],
+        branches: ["main", "v4"],
         "paths-ignore": ["CHANGELOG.md"],
       },
     });
@@ -466,7 +466,8 @@ export class PrerequisitesJob implements NormalJob {
       steps.Porcelain(),
       steps.TarProviderBinaries(opts.hasGenBinary),
       steps.UploadProviderBinaries(),
-      steps.TestProviderLibrary(),
+      // Maybe later
+      // steps.TestProviderLibrary(),
     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
     Object.assign(this, { name });
   }

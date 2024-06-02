@@ -851,8 +851,6 @@ export function UpdatePulumi(): Step {
     name: "Update Pulumi/Pulumi",
     id: "gomod",
     run:
-      "git config --local user.email 'bot@pulumi.com'\n" +
-      "git config --local user.name 'pulumi-bot'\n" +
       "git checkout -b update-pulumi/${{ github.run_id }}-${{ github.run_number }}\n" +
       "for MODFILE in $(find . -name go.mod); do pushd $(dirname $MODFILE); go get github.com/pulumi/pulumi/pkg/v3 github.com/pulumi/pulumi/sdk/v3; go mod tidy; popd; done\n" +
       // Fetch latest release version of Pulumi, remove the leading 'v' and store it to the `.pulumi.version` file.
