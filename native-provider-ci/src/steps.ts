@@ -436,7 +436,7 @@ export function CheckCleanWorkTree(): Step {
     with: {
       "allowed-changes": `\
 sdk/**/pulumi-plugin.json
-sdk/dotnet/Pulumi.*.csproj
+sdk/dotnet/*.csproj
 sdk/go/**/pulumiUtilities.go
 sdk/nodejs/package.json
 sdk/python/pyproject.toml`,

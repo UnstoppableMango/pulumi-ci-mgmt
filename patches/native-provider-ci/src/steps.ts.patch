@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/steps.ts b/native-provider-ci/src/steps.ts
-index b7114a324..ced4a8f07 100644
+index b7114a324..984da43e4 100644
 --- a/native-provider-ci/src/steps.ts
 +++ b/native-provider-ci/src/steps.ts
 @@ -28,7 +28,6 @@ export function CommandDispatchStep(providerName: string): Step {
@@ -89,6 +89,15 @@ index b7114a324..ced4a8f07 100644
    };
  }
  
+@@ -488,7 +436,7 @@ export function CheckCleanWorkTree(): Step {
+     with: {
+       "allowed-changes": `\
+ sdk/**/pulumi-plugin.json
+-sdk/dotnet/Pulumi.*.csproj
++sdk/dotnet/*.csproj
+ sdk/go/**/pulumiUtilities.go
+ sdk/nodejs/package.json
+ sdk/python/pyproject.toml`,
 @@ -533,19 +481,13 @@ export function PullRequestSdkGeneration(
    branch: string
  ): Step {
