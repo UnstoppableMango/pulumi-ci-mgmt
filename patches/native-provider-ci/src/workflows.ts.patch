@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index 300f8bf03..2f3eba0ba 100644
+index 300f8bf03..b85427c8b 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
 @@ -4,7 +4,7 @@ import * as steps from "./steps";
@@ -41,7 +41,12 @@ index 300f8bf03..2f3eba0ba 100644
        GOVERSION: goVersion,
        NODEVERSION: nodeVersion,
        PYTHONVERSION: pythonVersion,
-@@ -98,12 +90,11 @@ export function PullRequestWorkflow(
+@@ -94,16 +86,15 @@ export function PullRequestWorkflow(
+   return {
+     name: name,
+     on: {
+-      pull_request_target: {},
++      pull_request: {},
      },
      env: env(opts),
      jobs: {

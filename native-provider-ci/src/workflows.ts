@@ -86,7 +86,7 @@ export function PullRequestWorkflow(
   return {
     name: name,
     on: {
-      pull_request_target: {},
+      pull_request: {},
     },
     env: env(opts),
     jobs: {
