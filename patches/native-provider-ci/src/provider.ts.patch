@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/provider.ts b/native-provider-ci/src/provider.ts
-index b161e00b4..09d68fc95 100644
+index b161e00b4..254d9f3d9 100644
 --- a/native-provider-ci/src/provider.ts
 +++ b/native-provider-ci/src/provider.ts
 @@ -8,6 +8,7 @@ import { providersDir } from "../cmd/generate-providers";
@@ -10,7 +10,26 @@ index b161e00b4..09d68fc95 100644
    defaultBranch: z.string().default("master"),
    "golangci-timeout": z.string().default("20m"),
    "major-version": z.number().default(0),
-@@ -73,40 +74,5 @@ export const buildProviderFiles = (provider: string): ProviderFile[] => {
+@@ -36,18 +37,10 @@ export const buildProviderFiles = (provider: string): ProviderFile[] => {
+   const config = getProviderConfig(provider);
+   const githubWorkflowsDir = path.join(path.join(".github", "workflows"));
+   const files = [
+-    {
+-      path: path.join(githubWorkflowsDir, "command-dispatch.yml"),
+-      data: wf.CommandDispatchWorkflow("command-dispatch", config),
+-    },
+     {
+       path: path.join(githubWorkflowsDir, "pull-request.yml"),
+       data: wf.PullRequestWorkflow("pull-request", config),
+     },
+-    {
+-      path: path.join(githubWorkflowsDir, "run-acceptance-tests.yml"),
+-      data: wf.RunAcceptanceTestsWorkflow("run-acceptance-tests", config),
+-    },
+     {
+       path: path.join(githubWorkflowsDir, "weekly-pulumi-update.yml"),
+       data: wf.WeeklyPulumiUpdateWorkflow("weekly-pulumi-update", config),
+@@ -73,40 +66,5 @@ export const buildProviderFiles = (provider: string): ProviderFile[] => {
        data: new goreleaser.PulumiGoreleaserConfig(config),
      },
    ];
