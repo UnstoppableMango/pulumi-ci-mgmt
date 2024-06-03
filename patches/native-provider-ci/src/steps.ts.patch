@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/steps.ts b/native-provider-ci/src/steps.ts
-index b7114a324..3a5a9ecb6 100644
+index b7114a324..635c144c4 100644
 --- a/native-provider-ci/src/steps.ts
 +++ b/native-provider-ci/src/steps.ts
 @@ -28,7 +28,6 @@ export function CommandDispatchStep(providerName: string): Step {
@@ -89,7 +89,35 @@ index b7114a324..3a5a9ecb6 100644
    };
  }
  
-@@ -533,19 +481,12 @@ export function PullRequestSdkGeneration(
+@@ -488,10 +436,11 @@ export function CheckCleanWorkTree(): Step {
+     with: {
+       "allowed-changes": `\
+ sdk/**/pulumi-plugin.json
+-sdk/dotnet/Pulumi.*.csproj
++sdk/dotnet/*.csproj
+ sdk/go/**/pulumiUtilities.go
+ sdk/nodejs/package.json
+-sdk/python/pyproject.toml`,
++sdk/python/pyproject.toml
++sdk/java/build.gradle`,
+     },
+   };
+ }
+@@ -502,6 +451,13 @@ export function SetNugetSource(): Step {
+   };
+ }
+ 
++export function BuildTestImage(): Step {
++  return {
++    name: "Build test image",
++    uses: "./.github/actions/build-test-image",
++  };
++}
++
+ export function RunTests(provider: string, name: string): Step {
+   if (provider === "kubernetes") {
+     const shortMode = name === "run-acceptance-tests" ? " -short" : "";
+@@ -533,19 +489,13 @@ export function PullRequestSdkGeneration(
    branch: string
  ): Step {
    let dir;
@@ -106,12 +134,16 @@ index b7114a324..3a5a9ecb6 100644
      with: {
        destination_branch: branch,
 -      github_token: "${{ secrets.PULUMI_BOT_TOKEN }}",
++      github_token: "${{ secrets.GITHUB_TOKEN }}",
        pr_body: "*Automated PR*",
        pr_title: `Automated SDK generation @ ${dir} \${{ steps.vars.outputs.commit-hash }}`,
        author_name: "pulumi-bot",
-@@ -570,25 +511,6 @@ export function CheckSchemaChanges(provider: string): Step {
+@@ -568,27 +518,8 @@ export function CheckSchemaChanges(provider: string): Step {
+     name: "Check Schema is Valid",
+     run:
        "echo 'SCHEMA_CHANGES<<EOF' >> $GITHUB_ENV\n" +
-       "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
+-      "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
++      "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json --repository=github://api.github.com/unstoppablemango >> $GITHUB_ENV\n" +
        "echo 'EOF' >> $GITHUB_ENV",
 -    env: {
 -      GITHUB_TOKEN: "${{ secrets.PULUMI_BOT_TOKEN }}",
@@ -135,7 +167,7 @@ index b7114a324..3a5a9ecb6 100644
    };
  }
  
-@@ -929,8 +851,6 @@ export function UpdatePulumi(): Step {
+@@ -929,8 +860,6 @@ export function UpdatePulumi(): Step {
      name: "Update Pulumi/Pulumi",
      id: "gomod",
      run:
@@ -144,7 +176,12 @@ index b7114a324..3a5a9ecb6 100644
        "git checkout -b update-pulumi/${{ github.run_id }}-${{ github.run_number }}\n" +
        "for MODFILE in $(find . -name go.mod); do pushd $(dirname $MODFILE); go get github.com/pulumi/pulumi/pkg/v3 github.com/pulumi/pulumi/sdk/v3; go mod tidy; popd; done\n" +
        // Fetch latest release version of Pulumi, remove the leading 'v' and store it to the `.pulumi.version` file.
-@@ -977,10 +897,6 @@ export function CreateUpdatePulumiPR(branch: string): Step {
+@@ -973,14 +902,11 @@ export function CreateUpdatePulumiPR(branch: string): Step {
+     if: "steps.gomod.outputs.changes != 0",
+     uses: action.pullRequest,
+     with: {
++      github_token: "${{ secrets.GITHUB_TOKEN }}",
+       source_branch:
          "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
        destination_branch: branch,
        pr_title: "Automated Pulumi/Pulumi upgrade",
@@ -155,7 +192,7 @@ index b7114a324..3a5a9ecb6 100644
      },
    };
  }
-@@ -995,7 +911,6 @@ export function SetPRAutoMerge(provider?: string): Step {
+@@ -995,7 +921,6 @@ export function SetPRAutoMerge(provider?: string): Step {
      if: "steps.create-pr.outputs.has_changed_files",
      uses: action.autoMerge,
      with: {
@@ -163,7 +200,7 @@ index b7114a324..3a5a9ecb6 100644
        "pull-request-number": "${{ steps.create-pr.outputs.pr_number }}",
        repository: "${{ github.repository }}",
        "merge-method": "squash",
-@@ -1036,19 +951,6 @@ go/**
+@@ -1036,19 +961,6 @@ go/**
    };
  }
  
@@ -183,7 +220,7 @@ index b7114a324..3a5a9ecb6 100644
  export function DownloadSpecificSDKStep(name: string): Step {
    return {
      name: `Download ${name} SDK`,
-@@ -1077,7 +979,7 @@ export function InstallTwine(): Step {
+@@ -1077,7 +989,7 @@ export function InstallTwine(): Step {
  export function RunPublishSDK(): Step {
    return {
      name: "Publish SDKs",
@@ -192,7 +229,7 @@ index b7114a324..3a5a9ecb6 100644
      env: {
        NODE_AUTH_TOKEN: "${{ secrets.NPM_TOKEN }}",
        // See https://github.com/pulumi/scripts/pull/138/files
-@@ -1130,21 +1032,6 @@ export function AzureLogin(provider: string): Step {
+@@ -1130,21 +1042,6 @@ export function AzureLogin(provider: string): Step {
    return {};
  }
  
@@ -214,7 +251,7 @@ index b7114a324..3a5a9ecb6 100644
  export function MakeClean(): Step {
    return {
      name: "Cleanup SDK Folder",
-@@ -1159,13 +1046,6 @@ export function MakeLocalGenerate(): Step {
+@@ -1159,13 +1056,6 @@ export function MakeLocalGenerate(): Step {
    };
  }
  
@@ -228,7 +265,7 @@ index b7114a324..3a5a9ecb6 100644
  export function TestResultsJSON(): Step {
    return {
      name: "Test usage of results.json",
-@@ -1173,20 +1053,10 @@ export function TestResultsJSON(): Step {
+@@ -1173,20 +1063,10 @@ export function TestResultsJSON(): Step {
    };
  }
  
@@ -250,7 +287,7 @@ index b7114a324..3a5a9ecb6 100644
    };
  }
  
-@@ -1217,16 +1087,6 @@ export function MakeDiscovery(provider: string): Step {
+@@ -1217,16 +1097,6 @@ export function MakeDiscovery(provider: string): Step {
    return {};
  }
  

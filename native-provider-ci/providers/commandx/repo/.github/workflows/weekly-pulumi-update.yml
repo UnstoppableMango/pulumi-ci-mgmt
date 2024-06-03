@@ -41,7 +41,7 @@ jobs:
         go-version: ${{ env.GOVERSION }}
         cache-dependency-path: "**/*.sum"
     - name: Install pulumictl
-      uses: jaxxstorm/action-install-gh-release@v1.11.0
+      uses: jaxxstorm/action-install-gh-release@v1.12.0
       with:
         repo: pulumi/pulumictl
     - name: Install Pulumi CLI
@@ -105,8 +105,9 @@ jobs:
     - name: Create PR
       id: create-pr
       if: steps.gomod.outputs.changes != 0
-      uses: repo-sync/pull-request@v2.6.2
+      uses: repo-sync/pull-request@v2.12.1
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
         source_branch: update-pulumi/${{ github.run_id }}-${{ github.run_number }}
         destination_branch: main
         pr_title: Automated Pulumi/Pulumi upgrade

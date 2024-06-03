@@ -436,10 +436,11 @@ export function CheckCleanWorkTree(): Step {
     with: {
       "allowed-changes": `\
 sdk/**/pulumi-plugin.json
-sdk/dotnet/Pulumi.*.csproj
+sdk/dotnet/*.csproj
 sdk/go/**/pulumiUtilities.go
 sdk/nodejs/package.json
-sdk/python/pyproject.toml`,
+sdk/python/pyproject.toml
+sdk/java/build.gradle`,
     },
   };
 }
@@ -447,6 +448,13 @@ sdk/python/pyproject.toml`,
 export function SetNugetSource(): Step {
   return {
     run: "dotnet nuget add source ${{ github.workspace }}/nuget",
+  };
+}
+
+export function BuildTestImage(): Step {
+  return {
+    name: "Build test image",
+    uses: "./.github/actions/build-test-image",
   };
 }
 
@@ -487,6 +495,7 @@ export function PullRequestSdkGeneration(
     uses: action.pullRequest,
     with: {
       destination_branch: branch,
+      github_token: "${{ secrets.GITHUB_TOKEN }}",
       pr_body: "*Automated PR*",
       pr_title: `Automated SDK generation @ ${dir} \${{ steps.vars.outputs.commit-hash }}`,
       author_name: "pulumi-bot",
@@ -509,7 +518,7 @@ export function CheckSchemaChanges(provider: string): Step {
     name: "Check Schema is Valid",
     run:
       "echo 'SCHEMA_CHANGES<<EOF' >> $GITHUB_ENV\n" +
-      "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json >> $GITHUB_ENV\n" +
+      "schema-tools compare -p ${{ env.PROVIDER }} -o ${{ github.event.repository.default_branch }} -n --local-path=provider/cmd/pulumi-resource-${{ env.PROVIDER }}/schema.json --repository=github://api.github.com/unstoppablemango >> $GITHUB_ENV\n" +
       "echo 'EOF' >> $GITHUB_ENV",
   };
 }
@@ -893,6 +902,7 @@ export function CreateUpdatePulumiPR(branch: string): Step {
     if: "steps.gomod.outputs.changes != 0",
     uses: action.pullRequest,
     with: {
+      github_token: "${{ secrets.GITHUB_TOKEN }}",
       source_branch:
         "update-pulumi/${{ github.run_id }}-${{ github.run_number }}",
       destination_branch: branch,

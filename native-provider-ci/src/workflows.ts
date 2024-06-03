@@ -86,13 +86,15 @@ export function PullRequestWorkflow(
   return {
     name: name,
     on: {
-      pull_request_target: {},
+      pull_request: {},
     },
     env: env(opts),
     jobs: {
-      "comment-on-pr": new EmptyJob("comment-on-pr").addStep(
-        steps.CheckoutRepoStep()
+      prerequisites: new PrerequisitesJob("prerequisites", opts),
+      build_sdks: new BuildSdkJob("build_sdks", opts, false).addRunsOn(
+        opts.provider
       ),
+      test: new TestsJob(name, "test", opts),
     },
   };
 }
@@ -521,7 +523,7 @@ export class TestsJob implements NormalJob {
       contents: "read",
       "id-token": "write",
     };
-    this.steps = [
+    const testSteps = [
       steps.CheckoutRepoStep(),
       steps.SetProviderVersionStep(),
       steps.InstallGo(),
@@ -550,8 +552,16 @@ export class TestsJob implements NormalJob {
       steps.InstallandConfigureHelm(opts.provider),
       steps.SetupGotestfmt(),
       steps.CreateKindCluster(opts.provider, workflowName),
-      steps.RunTests(opts.provider, workflowName),
-    ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
+    ];
+
+    if (opts.provider === "commandx") {
+      testSteps.push(steps.BuildTestImage());
+    }
+
+    testSteps.push(steps.RunTests(opts.provider, workflowName));
+    this.steps = testSteps.filter(
+      (step: Step) => step.uses !== undefined || step.run !== undefined
+    );
     Object.assign(this, { name: jobName });
   }
 
