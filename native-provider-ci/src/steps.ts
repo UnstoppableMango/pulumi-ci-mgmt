@@ -453,8 +453,8 @@ export function SetNugetSource(): Step {
 
 export function BuildTestImage(): Step {
   return {
-    name: 'Build test image',
-    uses: './.github/actions/build-test-image',
+    name: "Build test image",
+    uses: "./.github/actions/build-test-image",
   };
 }
 

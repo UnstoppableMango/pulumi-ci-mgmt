@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/steps.ts b/native-provider-ci/src/steps.ts
-index b7114a324..213e7b56e 100644
+index b7114a324..635c144c4 100644
 --- a/native-provider-ci/src/steps.ts
 +++ b/native-provider-ci/src/steps.ts
 @@ -28,7 +28,6 @@ export function CommandDispatchStep(providerName: string): Step {
@@ -109,8 +109,8 @@ index b7114a324..213e7b56e 100644
  
 +export function BuildTestImage(): Step {
 +  return {
-+    name: 'Build test image',
-+    uses: './.github/actions/build-test-image',
++    name: "Build test image",
++    uses: "./.github/actions/build-test-image",
 +  };
 +}
 +
