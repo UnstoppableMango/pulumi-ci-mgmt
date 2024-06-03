@@ -451,6 +451,13 @@ export function SetNugetSource(): Step {
   };
 }
 
+export function BuildTestImage(): Step {
+  return {
+    name: 'Build test image',
+    uses: './.github/actions/build-test-image',
+  };
+}
+
 export function RunTests(provider: string, name: string): Step {
   if (provider === "kubernetes") {
     const shortMode = name === "run-acceptance-tests" ? " -short" : "";

@@ -1,5 +1,5 @@
 diff --git a/native-provider-ci/src/workflows.ts b/native-provider-ci/src/workflows.ts
-index 300f8bf03..b85427c8b 100644
+index 300f8bf03..595319b58 100644
 --- a/native-provider-ci/src/workflows.ts
 +++ b/native-provider-ci/src/workflows.ts
 @@ -4,7 +4,7 @@ import * as steps from "./steps";
@@ -221,7 +221,16 @@ index 300f8bf03..b85427c8b 100644
  
    needs = ["build_sdks"];
    strategy = {
-@@ -606,7 +546,6 @@ export class TestsJob implements NormalJob {
+@@ -583,7 +523,7 @@ export class TestsJob implements NormalJob {
+       contents: "read",
+       "id-token": "write",
+     };
+-    this.steps = [
++    const testSteps = [
+       steps.CheckoutRepoStep(),
+       steps.SetProviderVersionStep(),
+       steps.InstallGo(),
+@@ -606,16 +546,22 @@ export class TestsJob implements NormalJob {
        steps.InstallSDKDeps(),
        steps.MakeKubeDir(opts.provider, workflowName),
        steps.DownloadKubeconfig(opts.provider, workflowName),
@@ -229,15 +238,26 @@ index 300f8bf03..b85427c8b 100644
        steps.GoogleAuth(opts.gcp),
        steps.SetupGCloud(opts.gcp),
        steps.InstallKubectl(opts.provider),
-@@ -614,7 +553,6 @@ export class TestsJob implements NormalJob {
+       steps.InstallandConfigureHelm(opts.provider),
        steps.SetupGotestfmt(),
        steps.CreateKindCluster(opts.provider, workflowName),
-       steps.RunTests(opts.provider, workflowName),
+-      steps.RunTests(opts.provider, workflowName),
 -      steps.NotifySlack("Failure in SDK tests"),
-     ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
+-    ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
++    ];
++
++    if (opts.provider === "commandx") {
++      testSteps.push(steps.BuildTestImage());
++    }
++
++    testSteps.push(steps.RunTests(opts.provider, workflowName));
++    this.steps = testSteps.filter(
++      (step: Step) => step.uses !== undefined || step.run !== undefined
++    );
      Object.assign(this, { name: jobName });
    }
-@@ -759,11 +697,9 @@ export class PublishPrereleaseJob implements NormalJob {
+ 
+@@ -759,11 +705,9 @@ export class PublishPrereleaseJob implements NormalJob {
        steps.FreeDiskSpace(this["runs-on"]),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -249,7 +269,7 @@ index 300f8bf03..b85427c8b 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
      Object.assign(this, { name });
    }
-@@ -788,11 +724,9 @@ export class PublishJob implements NormalJob {
+@@ -788,11 +732,9 @@ export class PublishJob implements NormalJob {
        steps.FreeDiskSpace(this["runs-on"]),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -261,7 +281,7 @@ index 300f8bf03..b85427c8b 100644
      ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
    }
  }
-@@ -824,7 +758,6 @@ export class PublishSDKJob implements NormalJob {
+@@ -824,7 +766,6 @@ export class PublishSDKJob implements NormalJob {
        steps.UnzipSpecificSDKStep("nodejs"),
        steps.InstallTwine(),
        steps.RunPublishSDK(),
@@ -269,7 +289,7 @@ index 300f8bf03..b85427c8b 100644
      ];
    }
  }
-@@ -918,32 +851,6 @@ export class Arm2PulumiRelease implements NormalJob {
+@@ -918,32 +859,6 @@ export class Arm2PulumiRelease implements NormalJob {
    }
  }
  
@@ -302,7 +322,7 @@ index 300f8bf03..b85427c8b 100644
  export class WeeklyPulumiUpdate implements NormalJob {
    "runs-on" = "ubuntu-latest";
    steps: NormalJob["steps"];
-@@ -983,7 +890,6 @@ export class NightlySdkGeneration implements NormalJob {
+@@ -983,7 +898,6 @@ export class NightlySdkGeneration implements NormalJob {
        steps.InstallGo(goVersion),
        steps.InstallPulumiCtl(),
        steps.InstallPulumiCli(opts.pulumiCLIVersion),
@@ -310,7 +330,7 @@ index 300f8bf03..b85427c8b 100644
        steps.AzureLogin(opts.provider),
        steps.MakeClean(),
        steps.PrepareGitBranchForSdkGeneration(),
-@@ -996,7 +902,6 @@ export class NightlySdkGeneration implements NormalJob {
+@@ -996,7 +910,6 @@ export class NightlySdkGeneration implements NormalJob {
        steps.CommitAutomatedSDKUpdates(opts.provider),
        steps.PullRequestSdkGeneration(opts.provider, opts.defaultBranch),
        // steps.SetPRAutoMerge(opts.provider),

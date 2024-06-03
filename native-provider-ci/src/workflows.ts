@@ -523,7 +523,7 @@ export class TestsJob implements NormalJob {
       contents: "read",
       "id-token": "write",
     };
-    this.steps = [
+    const testSteps = [
       steps.CheckoutRepoStep(),
       steps.SetProviderVersionStep(),
       steps.InstallGo(),
@@ -552,8 +552,16 @@ export class TestsJob implements NormalJob {
       steps.InstallandConfigureHelm(opts.provider),
       steps.SetupGotestfmt(),
       steps.CreateKindCluster(opts.provider, workflowName),
-      steps.RunTests(opts.provider, workflowName),
-    ].filter((step: Step) => step.uses !== undefined || step.run !== undefined);
+    ];
+
+    if (opts.provider === "commandx") {
+      testSteps.push(steps.BuildTestImage());
+    }
+
+    testSteps.push(steps.RunTests(opts.provider, workflowName));
+    this.steps = testSteps.filter(
+      (step: Step) => step.uses !== undefined || step.run !== undefined
+    );
     Object.assign(this, { name: jobName });
   }
 
